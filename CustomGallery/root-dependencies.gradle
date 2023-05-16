@@ -1,0 +1,64 @@
+ext.versions = [:]
+def versions = [:]
+versions.compile_sdk = 31
+versions.min_sdk = 21
+versions.target_sdk = 31
+versions.app_version_major = '1'
+versions.app_version_minor = '2'
+versions.app_version_patch = '0'
+versions.app_version_code = 3
+versions.core = "1.8.0"
+versions.appcompat = "1.4.2"
+versions.material_design = "1.6.1"
+versions.constraint_layout = "2.1.4"
+versions.junit = "4.13.2"
+versions.android_junit = "1.1.5"
+versions.espresso_core = "3.5.1"
+versions.recycler_view = "1.2.1"
+versions.lifecycle = '2.4.1'
+versions.fragment_ktx = '1.4.1'
+versions.navigation = '2.4.2'
+versions.stream = '1.2.1'
+
+ext.deps = [:]
+def deps = [:]
+
+def android_core = [:]
+android_core.core = "androidx.core:core-ktx:$versions.core"
+android_core.appcompat = "androidx.appcompat:appcompat:$versions.appcompat"
+deps.android_core = android_core
+
+
+def ui = [:]
+ui.material_design = "com.google.android.material:material:$versions.material_design"
+ui.constraint_layout = "androidx.constraintlayout:constraintlayout:$versions.constraint_layout"
+ui.recycler_view = "androidx.recyclerview:recyclerview:$versions.recycler_view"
+deps.ui = ui
+
+def lifecycle = [:]
+lifecycle.viewmodel = "androidx.lifecycle:lifecycle-viewmodel-ktx:$versions.lifecycle"
+lifecycle.livedata = "androidx.lifecycle:lifecycle-livedata-ktx:$versions.lifecycle"
+lifecycle.annotation = "androidx.lifecycle:lifecycle-compiler:$versions.lifecycle"
+deps.lifecycle = lifecycle
+
+def ktx = [:]
+ktx.fragment = "androidx.fragment:fragment-ktx:$versions.fragment_ktx"
+deps.ktx = ktx
+
+def navigation = [:]
+navigation.main = "androidx.navigation:navigation-fragment-ktx:$versions.navigation"
+navigation.ui = "androidx.navigation:navigation-ui-ktx:$versions.navigation"
+navigation.safe_args = "androidx.navigation:navigation-safe-args-gradle-plugin:$versions.navigation"
+deps.navigation = navigation
+
+def stream = [:]
+stream.main = "com.annimon:stream:$versions.stream"
+deps.stream = stream
+
+def testing = [:]
+testing.junit = "junit:junit:$versions.junit"
+testing.android_junit = "androidx.test.ext:junit:$versions.android_junit"
+testing.espresso = "androidx.test.espresso:espresso-core:$versions.espresso_core"
+deps.testing = testing
+
+ext.deps = deps
