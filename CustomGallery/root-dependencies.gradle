@@ -16,9 +16,20 @@ versions.android_junit = "1.1.5"
 versions.espresso_core = "3.5.1"
 versions.recycler_view = "1.2.1"
 versions.lifecycle = '2.4.1'
+versions.glide = '4.12.0'
 versions.fragment_ktx = '1.4.1'
 versions.navigation = '2.4.2'
+versions.work_manager = '2.7.1'
 versions.stream = '1.2.1'
+versions.okhttp = '4.9.3'
+versions.google_play_service = '4.3.14'
+versions.photoview = '2.3.0'
+versions.cropper = '3.1.2'
+versions.exo_player = '2.17.1'
+versions.keyboardutil = '3.0.0-RC3'
+versions.audioWave = '0.9.2'
+versions.circleimageview = '3.1.0'
+ext.versions = versions
 
 ext.deps = [:]
 def deps = [:]
@@ -28,11 +39,11 @@ android_core.core = "androidx.core:core-ktx:$versions.core"
 android_core.appcompat = "androidx.appcompat:appcompat:$versions.appcompat"
 deps.android_core = android_core
 
-
 def ui = [:]
 ui.material_design = "com.google.android.material:material:$versions.material_design"
 ui.constraint_layout = "androidx.constraintlayout:constraintlayout:$versions.constraint_layout"
 ui.recycler_view = "androidx.recyclerview:recyclerview:$versions.recycler_view"
+ui.circleimageview = "de.hdodenhof:circleimageview:$versions.circleimageview"
 deps.ui = ui
 
 def lifecycle = [:]
@@ -40,6 +51,11 @@ lifecycle.viewmodel = "androidx.lifecycle:lifecycle-viewmodel-ktx:$versions.life
 lifecycle.livedata = "androidx.lifecycle:lifecycle-livedata-ktx:$versions.lifecycle"
 lifecycle.annotation = "androidx.lifecycle:lifecycle-compiler:$versions.lifecycle"
 deps.lifecycle = lifecycle
+
+def glide = [:]
+glide.core = "com.github.bumptech.glide:glide:$versions.glide"
+glide.compiler = "com.github.bumptech.glide:compiler:$versions.glide"
+deps.glide = glide
 
 def ktx = [:]
 ktx.fragment = "androidx.fragment:fragment-ktx:$versions.fragment_ktx"
@@ -51,9 +67,42 @@ navigation.ui = "androidx.navigation:navigation-ui-ktx:$versions.navigation"
 navigation.safe_args = "androidx.navigation:navigation-safe-args-gradle-plugin:$versions.navigation"
 deps.navigation = navigation
 
+def work_manager = [:]
+work_manager.main = "androidx.work:work-runtime-ktx:$versions.work_manager"
+deps.workmanager = work_manager
+
 def stream = [:]
 stream.main = "com.annimon:stream:$versions.stream"
 deps.stream = stream
+
+def okhttp = [:]
+okhttp.main = "com.squareup.okhttp3:okhttp:$versions.okhttp"
+okhttp.http_interceptor = "com.squareup.okhttp3:logging-interceptor:$versions.okhttp"
+deps.okhttp = okhttp
+
+def googlePlayServices = [:]
+googlePlayServices.main = "com.google.gms:google-services:$versions.google_play_service"
+deps.googlePlayServices = googlePlayServices
+
+def photoview = [:]
+photoview.main = "com.github.chrisbanes:PhotoView:$versions.photoview"
+deps.photoview = photoview
+
+def cropper = [:]
+cropper.main = "com.github.CanHub:Android-Image-Cropper:$versions.cropper"
+deps.cropper = cropper
+
+def exo_player = [:]
+exo_player.main = "com.google.android.exoplayer:exoplayer:$versions.exo_player"
+deps.exo_player = exo_player
+
+def keyboardutil = [:]
+keyboardutil.main = "net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:$versions.keyboardutil"
+deps.keyboardutil = keyboardutil
+
+def audioWave = [:]
+audioWave.main = "com.github.alxrm:audiowave-progressbar:$versions.audioWave"
+deps.audioWave = audioWave
 
 def testing = [:]
 testing.junit = "junit:junit:$versions.junit"

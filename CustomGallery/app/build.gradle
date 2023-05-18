@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace 'com.likeminds.customgallerysampleapp'
-    compileSdk 33
+    compileSdkVersion versions.compile_sdk
 
     defaultConfig {
         applicationId "com.likeminds.customgallerysampleapp"

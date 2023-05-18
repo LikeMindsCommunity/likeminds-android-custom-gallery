@@ -1,0 +1,33 @@
+package com.likeminds.customgallery.utils.model
+
+import androidx.annotation.IntDef
+
+const val ITEM_MEDIA_PICKER_FOLDER = 1
+const val ITEM_MEDIA_PICKER_SINGLE = 2
+const val ITEM_MEDIA_PICKER_HEADER = 3
+const val ITEM_MEDIA_PICKER_BROWSE = 4
+const val ITEM_MEDIA_PICKER_DOCUMENT = 5
+const val ITEM_MEDIA_SMALL = 6
+const val ITEM_MEDIA_PICKER_AUDIO = 7
+const val ITEM_IMAGE_SWIPE = 8
+const val ITEM_VIDEO_SWIPE = 9
+const val ITEM_AUDIO_SMALL = 10
+const val ITEM_DOCUMENT_SMALL = 11
+const val ITEM_SMALL_ADD_MEDIA = 12
+
+@IntDef(
+    ITEM_MEDIA_PICKER_FOLDER,
+    ITEM_MEDIA_PICKER_SINGLE,
+    ITEM_MEDIA_PICKER_HEADER,
+    ITEM_MEDIA_PICKER_BROWSE,
+    ITEM_MEDIA_PICKER_DOCUMENT,
+    ITEM_MEDIA_SMALL,
+    ITEM_MEDIA_PICKER_AUDIO,
+    ITEM_IMAGE_SWIPE,
+    ITEM_VIDEO_SWIPE,
+    ITEM_AUDIO_SMALL,
+    ITEM_DOCUMENT_SMALL,
+    ITEM_SMALL_ADD_MEDIA
+)
+@Retention(AnnotationRetention.SOURCE)
+annotation class ViewType

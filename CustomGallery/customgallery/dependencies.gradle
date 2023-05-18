@@ -8,15 +8,40 @@ dependencies {
     implementation deps.ui.material_design
     implementation deps.ui.constraint_layout
     implementation deps.ui.recycler_view
+    implementation deps.ui.circleimageview
 
     //lifecycle and viewmodel
     implementation deps.lifecycle.viewmodel
     implementation deps.lifecycle.livedata
     kapt deps.lifecycle.annotation
 
+    //glide
+    implementation deps.glide.core
+    kapt deps.glide.compiler
+
     //navigation
     implementation deps.navigation.main
     implementation deps.navigation.ui
+
+    //workmanager
+    implementation deps.workmanager.main
+
+    //okhttp
+    implementation deps.okhttp.main
+    implementation deps.okhttp.http_interceptor
+
+    //photoview
+    implementation deps.photoview.main
+
+    //exoPlayer
+    implementation deps.exo_player.main
+
+    //keyboardutil
+    implementation deps.keyboardutil.main
+
+    //3rd Party Libraries included as jar or module
+    implementation deps.cropper.main
+    implementation deps.audioWave.main
 
     //testing
     testImplementation deps.testing.junit

@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace 'com.likeminds.customgallery'
-    compileSdk versions.compile_sdk
+    compileSdkVersion versions.compile_sdk
 
     defaultConfig {
         minSdk versions.min_sdk

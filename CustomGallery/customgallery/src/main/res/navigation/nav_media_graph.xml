@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_media_graph"
+    app:startDestination="@id/mediaHorizontalListFragment">
+
+    <fragment
+        android:id="@+id/mediaEditFragment"
+        android:name="com.likeminds.customgallery.media.view.MediaEditFragment"
+        android:label="MediaEditFragment"
+        tools:layout="@layout/fragment_media_edit">
+        <argument
+            android:name="media_extras"
+            app:argType="com.likeminds.customgallery.media.model.MediaExtras" />
+        <action
+            android:id="@+id/action_mediaEditFragment_to_imageCropFragment"
+            app:destination="@id/imageCropFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/mediaHorizontalListFragment"
+        android:name="com.likeminds.customgallery.media.view.MediaHorizontalListFragment"
+        android:label="MediaHorizontalListFragment"
+        tools:layout="@layout/fragment_media_horizontal_list">
+        <argument
+            android:name="media_extras"
+            app:argType="com.likeminds.customgallery.media.model.MediaExtras" />
+    </fragment>
+    <fragment
+        android:id="@+id/mediaVerticalListFragment"
+        android:name="com.likeminds.customgallery.media.view.MediaVerticalListFragment"
+        android:label="MediaVerticalListFragment"
+        tools:layout="@layout/fragment_media_vertical_list">
+        <argument
+            android:name="media_extras"
+            app:argType="com.likeminds.customgallery.media.model.MediaExtras" />
+    </fragment>
+    <fragment
+        android:id="@+id/imageCropFragment"
+        android:name="com.likeminds.customgallery.media.view.ImageCropFragment"
+        android:label="fragment_image_crop"
+        tools:layout="@layout/fragment_image_crop">
+        <argument
+            android:name="singleUriData"
+            app:argType="com.likeminds.customgallery.media.model.SingleUriData" />
+        <argument
+            android:name="is_from_activity"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="crop_square"
+            android:defaultValue="false"
+            app:argType="boolean" />
+    </fragment>
+    <fragment
+        android:id="@+id/playVideoFragment"
+        android:name="com.likeminds.customgallery.media.view.PlayVideoFragment"
+        android:label="PlayVideoFragment"
+        tools:layout="@layout/fragment_play_video">
+        <argument
+            android:name="media_extras"
+            app:argType="com.likeminds.customgallery.media.model.MediaExtras" />
+    </fragment>
+    <fragment
+        android:id="@+id/documentSendFragment"
+        android:name="com.likeminds.customgallery.media.view.DocumentSendFragment"
+        android:label="ConversationDocumentSendFragment"
+        tools:layout="@layout/fragment_conversation_document_send">
+        <argument
+            android:name="media_extras"
+            app:argType="com.likeminds.customgallery.media.model.MediaExtras" />
+    </fragment>
+    <fragment
+        android:id="@+id/audioEditSendFragment"
+        android:name="com.likeminds.customgallery.media.view.AudioSendEditFragment"
+        android:label="ConversationAudioSendEditFragment"
+        tools:layout="@layout/fragment_conversation_audio_edit_send">
+        <argument
+            android:name="media_extras"
+            app:argType="com.likeminds.customgallery.media.model.MediaExtras" />
+    </fragment>
+</navigation>
