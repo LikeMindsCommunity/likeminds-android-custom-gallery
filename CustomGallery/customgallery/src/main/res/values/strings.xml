@@ -34,4 +34,15 @@
     <string name="documents">Documents</string>
     <string name="sort_by_name">Sort by name</string>
     <string name="sort_by_date">Sort by date</string>
+    <string name="gallery">Gallery</string>
+    <string name="tap_photo_to_select">Tap photo to select</string>
+    <string name="browse_other_docs">Browse other docs…</string>
+    <string name="search_hint_text">Search…</string>
+    <string name="save_to_gallery">Save to gallery</string>
+    <string name="ok">OK</string>
+    <string name="action_search">Search</string>
+    <string name="sort">Sort</string>
+    <string name="select_multiple">Select multiple</string>
+    <string name="audio_is_played">Audio is being played in chatroom</string>
+    <string name="large_file_select_error_message">Files below 100 KB and above 100 MB are not allowed</string>
 </resources>

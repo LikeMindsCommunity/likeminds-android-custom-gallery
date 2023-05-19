@@ -336,6 +336,7 @@ internal class CanvasView : View, OnRotationGestureListener {
 //                    Log.e("onActionDown", "false")
 //                }
 //            }
+            else -> {}
         }
     }
 
@@ -361,6 +362,7 @@ internal class CanvasView : View, OnRotationGestureListener {
                     startY = y
                 }
             }
+            else -> {}
         }
     }
 

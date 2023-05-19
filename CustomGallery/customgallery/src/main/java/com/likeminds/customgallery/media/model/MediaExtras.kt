@@ -1,8 +1,6 @@
 package com.likeminds.customgallery.media.model
 
 import android.os.Parcelable
-import com.giphy.sdk.core.models.Media
-import com.likeminds.customgallery.chatroom.detail.model.CollabcardAttachmentViewData
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -11,7 +9,6 @@ internal class MediaExtras private constructor(
     var mediaScreenType: Int,
     var title: String?,
     var subtitle: String?,
-    var attachments: List<CollabcardAttachmentViewData>?,
     var singleUriData: SingleUriData?,
     var mediaUris: ArrayList<SingleUriData>?,
     var selectedMediaPosition: Int?,
@@ -27,7 +24,6 @@ internal class MediaExtras private constructor(
     var chatroomType: String?,
     var communityName: String?,
     var searchKey: String?,
-    var giphyMedia: Media?,
     var conversationId: String?,
     var isSecretChatroom: Boolean?
 ) : Parcelable {
@@ -37,7 +33,6 @@ internal class MediaExtras private constructor(
         private var mediaScreenType: Int = -1
         private var title: String? = null
         private var subtitle: String? = null
-        private var attachments: List<CollabcardAttachmentViewData>? = null
         private var singleUriData: SingleUriData? = null
         private var mediaUris: ArrayList<SingleUriData>? = null
         private var selectedMediaPosition: Int? = null
@@ -53,7 +48,6 @@ internal class MediaExtras private constructor(
         private var chatroomType: String? = null
         private var communityName: String? = null
         private var searchKey: String? = null
-        private var giphyMedia: Media? = null
         private var conversationId: String? = null
         private var isSecretChatroom: Boolean? = null
 
@@ -63,8 +57,6 @@ internal class MediaExtras private constructor(
         fun mediaScreenType(mediaScreenType: Int) = apply { this.mediaScreenType = mediaScreenType }
         fun title(title: String?) = apply { this.title = title }
         fun subtitle(subtitle: String?) = apply { this.subtitle = subtitle }
-        fun attachments(attachments: List<CollabcardAttachmentViewData>?) =
-            apply { this.attachments = attachments }
 
         fun singleUriData(singleUriData: SingleUriData?) =
             apply { this.singleUriData = singleUriData }
@@ -87,7 +79,6 @@ internal class MediaExtras private constructor(
         fun chatroomType(chatroomType: String?) = apply { this.chatroomType = chatroomType }
         fun communityName(communityName: String?) = apply { this.communityName = communityName }
         fun searchKey(searchKey: String?) = apply { this.searchKey = searchKey }
-        fun giphyMedia(giphyMedia: Media?) = apply { this.giphyMedia = giphyMedia }
         fun conversationId(conversationId: String?) = apply { this.conversationId = conversationId }
         fun isSecretChatroom(isSecretChatroom: Boolean?) =
             apply { this.isSecretChatroom = isSecretChatroom }
@@ -97,7 +88,6 @@ internal class MediaExtras private constructor(
             mediaScreenType,
             title,
             subtitle,
-            attachments,
             singleUriData,
             mediaUris,
             selectedMediaPosition,
@@ -113,7 +103,6 @@ internal class MediaExtras private constructor(
             chatroomType,
             communityName,
             searchKey,
-            giphyMedia,
             conversationId,
             isSecretChatroom
         )
@@ -124,7 +113,6 @@ internal class MediaExtras private constructor(
             .mediaScreenType(mediaScreenType)
             .title(title)
             .subtitle(subtitle)
-            .attachments(attachments)
             .singleUriData(singleUriData)
             .mediaUris(mediaUris)
             .selectedMediaPosition(selectedMediaPosition)
@@ -140,7 +128,6 @@ internal class MediaExtras private constructor(
             .chatroomType(chatroomType)
             .communityName(communityName)
             .searchKey(searchKey)
-            .giphyMedia(giphyMedia)
             .conversationId(conversationId)
             .isSecretChatroom(isSecretChatroom)
     }

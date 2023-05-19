@@ -15,7 +15,6 @@ import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.annotation.WorkerThread
 import com.annimon.stream.Stream
-import com.collabmates.sdk.media.model.*
 import com.likeminds.customgallery.R
 import com.likeminds.customgallery.media.model.*
 import com.likeminds.customgallery.media.util.MediaUtils

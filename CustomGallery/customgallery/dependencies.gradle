@@ -39,6 +39,9 @@ dependencies {
     //keyboardutil
     implementation deps.keyboardutil.main
 
+    //mp4parser
+    implementation deps.mp4parser.main
+
     //3rd Party Libraries included as jar or module
     implementation deps.cropper.main
     implementation deps.audioWave.main

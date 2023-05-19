@@ -2,7 +2,9 @@ package com.likeminds.customgallery.utils
 
 import android.content.Context
 import android.content.Intent
+import com.likeminds.customgallery.media.customviews.WrappedDrawable
 import com.likeminds.customgallery.media.model.*
+import com.likeminds.customgallery.utils.ViewUtils.dpToPx
 import com.likeminds.customgallery.utils.file.util.FileUtil
 
 object AndroidUtil {
@@ -103,5 +105,47 @@ object AndroidUtil {
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, allowMultipleSelect)
         intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true)
         return intent
+    }
+
+    /**
+     * Returns the list of apps which can be used pick both images and videos using intent
+     * */
+    fun getExternalMediaPickerApps(context: Context): List<LocalAppData> {
+        val intent = getExternalMediaPickerIntent()
+        return getLocalAppData(context, intent)
+    }
+
+    /**
+     * Returns the list of apps which can be used pick images using intent
+     * */
+    fun getExternalImagePickerApps(context: Context): List<LocalAppData> {
+        val intent = getExternalImagePickerIntent()
+        return getLocalAppData(context, intent)
+    }
+
+    /**
+     * Returns the list of apps which can be used pick videos using intent
+     * */
+    fun getExternalVideoPickerApps(context: Context): List<LocalAppData> {
+        val intent = getExternalVideoPickerIntent()
+        return getLocalAppData(context, intent)
+    }
+
+    /**
+     * Returns the list of apps with basic information which can be queried for a particular intent
+     * */
+    private fun getLocalAppData(context: Context, intent: Intent): List<LocalAppData> {
+        val packageManager = context.packageManager
+        return packageManager.queryIntentActivities(intent, 0)
+            .mapIndexedNotNull { index, resolveInfo ->
+                val drawable = WrappedDrawable(resolveInfo.loadIcon(packageManager))
+                drawable.setBounds(0, 0, dpToPx(50), dpToPx(50))
+                LocalAppData(
+                    index,
+                    resolveInfo.loadLabel(packageManager).toString(),
+                    drawable,
+                    resolveInfo
+                )
+            }
     }
 }

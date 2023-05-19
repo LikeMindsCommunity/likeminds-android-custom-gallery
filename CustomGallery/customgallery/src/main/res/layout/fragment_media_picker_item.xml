@@ -15,7 +15,7 @@
         android:layout_height="match_parent"
         android:background="@color/white">
 
-        <com.likeminds.feedsx.branding.customview.LikeMindsToolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
@@ -46,7 +46,7 @@
                     app:srcCompat="@drawable/ic_arrow_back_white_24dp"
                     tools:ignore="ContentDescription" />
 
-                <com.likeminds.feedsx.branding.customview.LikeMindsTextView
+                <TextView
                     android:id="@+id/tv_toolbar_title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -57,15 +57,13 @@
                     android:includeFontPadding="false"
                     android:singleLine="true"
                     android:textSize="20sp"
-                    app:com.likeminds.customgallery="medium"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/iv_back"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:textType="title"
                     tools:text="Send" />
             </androidx.constraintlayout.widget.ConstraintLayout>
-        </com.likeminds.feedsx.branding.customview.LikeMindsToolbar>
+        </androidx.appcompat.widget.Toolbar>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_media_item"

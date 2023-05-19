@@ -19,6 +19,7 @@ import com.likeminds.customgallery.media.view.adapter.MediaPickerAdapterListener
 import com.likeminds.customgallery.media.viewmodel.MediaViewModel
 import com.likeminds.customgallery.utils.AndroidUtil
 import com.likeminds.customgallery.utils.customview.BaseFragment
+import com.likeminds.customgallery.utils.recyclerview.GridSpacingItemDecoration
 
 internal class MediaPickerFolderFragment :
     BaseFragment<FragmentMediaPickerFolderBinding, MediaViewModel>(),

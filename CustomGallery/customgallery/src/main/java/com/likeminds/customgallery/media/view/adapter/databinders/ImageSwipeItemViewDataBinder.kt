@@ -5,8 +5,8 @@ import android.view.ViewGroup
 import com.likeminds.customgallery.databinding.ItemImageSwipeBinding
 import com.likeminds.customgallery.media.model.MediaSwipeViewData
 import com.likeminds.customgallery.media.view.adapter.ImageSwipeAdapterListener
-import com.likeminds.customgallery.utils.ITEM_IMAGE_SWIPE
 import com.likeminds.customgallery.utils.customview.ViewDataBinder
+import com.likeminds.customgallery.utils.model.ITEM_IMAGE_SWIPE
 
 internal class ImageSwipeItemViewDataBinder constructor(val listener: ImageSwipeAdapterListener) :
     ViewDataBinder<ItemImageSwipeBinding, MediaSwipeViewData>() {
@@ -24,7 +24,7 @@ internal class ImageSwipeItemViewDataBinder constructor(val listener: ImageSwipe
     }
 
     override fun bindData(binding: ItemImageSwipeBinding, data: MediaSwipeViewData, position: Int) {
-        binding.uri = data.uri().toString()
+        binding.uri = data.uri.toString()
         listener.onImageViewed()
         binding.executePendingBindings()
     }

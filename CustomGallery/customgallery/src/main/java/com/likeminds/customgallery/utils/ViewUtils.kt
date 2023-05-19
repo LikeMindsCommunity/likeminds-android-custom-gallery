@@ -3,6 +3,7 @@ package com.likeminds.customgallery.utils
 import android.app.Activity
 import android.content.Context
 import android.content.res.Resources
+import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -14,6 +15,14 @@ import androidx.navigation.fragment.NavHostFragment
 object ViewUtils {
     fun dpToPx(dp: Int): Int {
         return (dp * Resources.getSystem().displayMetrics.density).toInt()
+    }
+
+    fun spToPx(sp: Int): Float {
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_SP,
+            sp.toFloat(),
+            Resources.getSystem().displayMetrics
+        )
     }
 
     fun showShortToast(context: Context?, text: String?) {

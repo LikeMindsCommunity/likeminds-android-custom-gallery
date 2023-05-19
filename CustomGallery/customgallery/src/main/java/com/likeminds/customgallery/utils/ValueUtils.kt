@@ -3,7 +3,10 @@ package com.likeminds.customgallery.utils
 import android.content.Context
 import android.net.Uri
 import android.webkit.MimeTypeMap
-import com.likeminds.customgallery.media.model.*
+import com.likeminds.customgallery.media.model.AUDIO
+import com.likeminds.customgallery.media.model.IMAGE
+import com.likeminds.customgallery.media.model.PDF
+import com.likeminds.customgallery.media.model.VIDEO
 import com.likeminds.customgallery.utils.file.util.FileUtil
 import com.likeminds.customgallery.utils.file.util.isLargeFile
 import java.io.File
@@ -18,7 +21,6 @@ object ValueUtils {
         var mediaType: String? = null
         if (this != null) {
             when {
-                this == "image/gif" -> mediaType = GIF
                 this.startsWith("image") -> mediaType = IMAGE
                 this.startsWith("video") -> mediaType = VIDEO
                 this == "application/pdf" -> mediaType = PDF
@@ -54,5 +56,29 @@ object ValueUtils {
             return !File(path).isLargeFile
         }
         return false
+    }
+
+    /**
+     * This function run filter and map operation in single loop
+     */
+    inline fun <T, R, P> Iterable<T>.filterThenMap(
+        predicate: (T) -> Pair<Boolean, P>,
+        transform: (Pair<T, P>) -> R
+    ): List<R> {
+        return filterThenMap(ArrayList(), predicate, transform)
+    }
+
+    inline fun <T, R, P, C : MutableCollection<in R>>
+            Iterable<T>.filterThenMap(
+        collection: C, predicate: (T) -> Pair<Boolean, P>,
+        transform: (Pair<T, P>) -> R
+    ): C {
+        for (element in this) {
+            val response = predicate(element)
+            if (response.first) {
+                collection.add(transform(Pair(element, response.second)))
+            }
+        }
+        return collection
     }
 }

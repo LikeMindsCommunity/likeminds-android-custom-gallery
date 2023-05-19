@@ -3,15 +3,15 @@ package com.likeminds.customgallery.media.viewmodel
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import androidx.lifecycle.*
-import com.collabmates.sdk.media.model.*
-import com.collabmates.sdk.utils.filterThenMap
-import com.giphy.sdk.core.models.Media
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.likeminds.customgallery.media.MediaRepository
 import com.likeminds.customgallery.media.model.*
 import com.likeminds.customgallery.media.util.MediaUtils
-import com.likeminds.customgallery.utils.GiphyUtil
-import com.likeminds.customgallery.utils.coroutine.*
+import com.likeminds.customgallery.utils.ValueUtils.filterThenMap
+import com.likeminds.customgallery.utils.coroutine.launchDefault
 import com.likeminds.customgallery.utils.file.util.FileUtil
 import com.likeminds.customgallery.utils.model.BaseViewType
 
@@ -32,12 +32,6 @@ internal class MediaViewModel constructor(
     val audioByteArray = MutableLiveData<ByteArray>()
 
     private val getMediaBrowserViewData by lazy { MediaBrowserViewData() }
-
-    private val giphyMedia = MutableLiveData<Pair<Boolean, Uri?>>()
-
-    fun getGiphyMedia(): LiveData<Pair<Boolean, Uri?>> {
-        return giphyMedia
-    }
 
     fun getDocumentPreview(): LiveData<List<SingleUriData>> {
         return documentPreviewLiveData
@@ -75,11 +69,6 @@ internal class MediaViewModel constructor(
                     IMAGE -> {
                         val newUri =
                             FileUtil.getSharedImageUri(context, uri) ?: return@mapNotNull null
-                        singleUriData.toBuilder().uri(newUri).build()
-                    }
-                    GIF -> {
-                        val newUri =
-                            FileUtil.getSharedGifUri(context, uri) ?: return@mapNotNull null
                         singleUriData.toBuilder().uri(newUri).build()
                     }
                     VIDEO -> {
@@ -133,8 +122,8 @@ internal class MediaViewModel constructor(
             var headerName = ""
             medias.forEach { media ->
                 if (media.dateTimeStampHeader != headerName) {
-                    mediaList.add(getMediaHeader(media.dateTimeStampHeader()))
-                    headerName = media.dateTimeStampHeader()
+                    mediaList.add(getMediaHeader(media.dateTimeStampHeader))
+                    headerName = media.dateTimeStampHeader
                 }
                 mediaList.add(media)
             }
@@ -167,12 +156,12 @@ internal class MediaViewModel constructor(
     }
 
     fun sortDocumentsByName() {
-        documentMediaList.sortBy { it.mediaName() }
+        documentMediaList.sortBy { it.mediaName }
         postDocumentListForView(documentMediaList)
     }
 
     fun sortDocumentsByDate() {
-        documentMediaList.sortByDescending { it.date() }
+        documentMediaList.sortByDescending { it.date }
         postDocumentListForView(documentMediaList)
     }
 
@@ -180,7 +169,7 @@ internal class MediaViewModel constructor(
         val keywordList = keyword.split(" ")
         val updatedList = documentMediaList.filterThenMap({ media ->
             val matchedKeywords = keywordList.filter {
-                media.mediaName()?.contains(it) == true
+                media.mediaName?.contains(it) == true
             }
             Pair(matchedKeywords.isNotEmpty(), matchedKeywords)
         }, {
@@ -221,7 +210,7 @@ internal class MediaViewModel constructor(
         val keywordList = keyword.split(" ")
         val updatedList = audioMediaList.filterThenMap({ media ->
             val matchedKeywords = keywordList.filter {
-                media.mediaName()?.contains(it, true) == true
+                media.mediaName?.contains(it, true) == true
             }
             Pair(matchedKeywords.isNotEmpty(), matchedKeywords)
         }, {
@@ -251,17 +240,6 @@ internal class MediaViewModel constructor(
     fun convertUriToByteArray(context: Context, uri: Uri) {
         viewModelScope.launchDefault {
             audioByteArray.postValue(mediaRepository.convertUriToByteArray(context, uri))
-        }
-    }
-
-    fun getGiphyUri(context: Context, media: Media) {
-        giphyMedia.postValue(Pair(true, null))
-        GiphyUtil.getGifLink(media)?.let { link ->
-            viewModelScope.launchIO {
-                FileUtil.getGifUri(context, link)?.let { uri ->
-                    giphyMedia.postValue(Pair(false, uri))
-                }
-            }
         }
     }
 }

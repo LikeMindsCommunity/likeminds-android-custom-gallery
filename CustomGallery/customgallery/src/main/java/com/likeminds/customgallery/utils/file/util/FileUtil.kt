@@ -361,6 +361,76 @@ object FileUtil {
             storageDir /* directory */
         )
     }
+
+    fun getAudioThumbnail(context: Context, audioUri: Uri?): Uri? {
+        var bitmap: Bitmap? = null
+        var mediaMetadataRetriever: MediaMetadataRetriever? = null
+        val bfo = BitmapFactory.Options()
+        try {
+            mediaMetadataRetriever = MediaMetadataRetriever()
+            mediaMetadataRetriever.setDataSource(context, audioUri)
+            val rawArt = mediaMetadataRetriever.embeddedPicture
+            bitmap = if (rawArt != null) {
+                BitmapFactory.decodeByteArray(rawArt, 0, rawArt.size, bfo)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            mediaMetadataRetriever?.release()
+        }
+
+        return getUriFromBitmapWithRandomName(context, bitmap)
+    }
+
+    fun getSharedAudioUri(context: Context, oldUri: Uri?): Uri? {
+        var newUri: Uri? = null
+        oldUri?.let {
+            try {
+                val parcelFileDescriptor = context.contentResolver.openFileDescriptor(oldUri, "r")!!
+                val fileDescriptor = parcelFileDescriptor.fileDescriptor
+
+                val audioFolder = File(context.cacheDir, "audios")
+                audioFolder.mkdir()
+
+                val file = File(audioFolder, "${System.currentTimeMillis()}.mp3")
+
+                val inputStream: InputStream = FileInputStream(fileDescriptor)
+                val outputStream = FileOutputStream(file)
+
+                val buf = ByteArray(1024)
+                var len: Int
+
+                while (inputStream.read(buf).also { len = it } > 0) {
+                    outputStream.write(buf, 0, len)
+                }
+
+                outputStream.flush()
+                outputStream.close()
+                inputStream.close()
+                newUri = Uri.fromFile(file)
+            } catch (e: IOException) {
+                Log.e(
+                    "FileUtils",
+                    "IOException while trying to copy audio from uri: " + e.localizedMessage
+                )
+            }
+        }
+
+        return newUri
+    }
+
+    @Throws(IOException::class)
+    fun createVideoFile(context: Context): File {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_MOVIES)
+        return File.createTempFile(
+            "VID_${timeStamp}_", /* prefix */
+            ".mp4", /* suffix */
+            storageDir /* directory */
+        )
+    }
 }
 
 private const val LARGE_FILE_SIZE = 100 //in MegaBytes

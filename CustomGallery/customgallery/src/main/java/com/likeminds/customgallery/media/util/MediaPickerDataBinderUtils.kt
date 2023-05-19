@@ -1,7 +1,7 @@
 package com.likeminds.customgallery.media.util
 
 import android.text.SpannableStringBuilder
-import com.likeminds.customgallery.search.util.SearchUtils
+import com.likeminds.feedsx.search.util.SearchUtils
 
 internal class MediaPickerDataBinderUtils {
     companion object {

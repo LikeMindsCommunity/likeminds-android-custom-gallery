@@ -63,12 +63,11 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/iv_back"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:textType="title"
                     tools:text="All Media" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.appcompat.widget.Toolbar>
 
-        <com.likeminds.feedsx.utils.recyclerview.AnimatedRecyclerView
+        <com.likeminds.customgallery.utils.recyclerview.AnimatedRecyclerView
             android:id="@+id/rv_folder"
             android:layout_width="0dp"
             android:layout_height="0dp"

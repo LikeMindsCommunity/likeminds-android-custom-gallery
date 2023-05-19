@@ -2,7 +2,6 @@ package com.likeminds.customgallery.media.view
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -11,9 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.likeminds.customgallery.R
-import com.likeminds.customgallery.SDKApplication
-import com.likeminds.customgallery.base.BaseAppCompatActivity
-import com.likeminds.customgallery.chatroom.detail.model.CollabcardDetailActionModeData
 import com.likeminds.customgallery.databinding.FragmentMediaPickerItemBinding
 import com.likeminds.customgallery.media.model.MEDIA_RESULT_PICKED
 import com.likeminds.customgallery.media.model.MediaPickerItemExtras
@@ -22,10 +18,11 @@ import com.likeminds.customgallery.media.model.MediaViewData
 import com.likeminds.customgallery.media.view.adapter.MediaPickerAdapter
 import com.likeminds.customgallery.media.view.adapter.MediaPickerAdapterListener
 import com.likeminds.customgallery.media.viewmodel.MediaViewModel
-import com.likeminds.customgallery.utils.ITEM_MEDIA_PICKER_HEADER
 import com.likeminds.customgallery.utils.actionmode.ActionModeCallback
 import com.likeminds.customgallery.utils.actionmode.ActionModeListener
+import com.likeminds.customgallery.utils.customview.BaseAppCompatActivity
 import com.likeminds.customgallery.utils.customview.BaseFragment
+import com.likeminds.customgallery.utils.model.ITEM_MEDIA_PICKER_HEADER
 import com.likeminds.customgallery.utils.permissions.Permission
 import com.likeminds.customgallery.utils.permissions.PermissionDeniedCallback
 import com.likeminds.customgallery.utils.permissions.PermissionManager
@@ -34,9 +31,9 @@ import com.likeminds.customgallery.utils.permissions.PermissionManager
 internal class MediaPickerItemFragment :
     BaseFragment<FragmentMediaPickerItemBinding, MediaViewModel>(),
     MediaPickerAdapterListener,
-    ActionModeListener<CollabcardDetailActionModeData> {
+    ActionModeListener {
 
-    private var actionModeCallback: ActionModeCallback<CollabcardDetailActionModeData>? = null
+    private var actionModeCallback: ActionModeCallback? = null
 
     lateinit var mediaPickerAdapter: MediaPickerAdapter
 
@@ -63,26 +60,6 @@ internal class MediaPickerItemFragment :
 
     override fun getViewBinding(): FragmentMediaPickerItemBinding {
         return FragmentMediaPickerItemBinding.inflate(layoutInflater)
-    }
-
-    override fun drawPrimaryColor(color: Int) {
-        super.drawPrimaryColor(color)
-        binding.toolbar.setBackgroundColor(Color.WHITE)
-
-        binding.toolbar.setTitleTextColor(Color.BLACK)
-        binding.toolbar.setSubtitleTextColor(Color.BLACK)
-        binding.toolbar.navigationIcon?.setTint(Color.BLACK)
-        binding.toolbar.overflowIcon?.setTint(Color.BLACK)
-    }
-
-    override fun drawAdvancedColor(headerColor: Int, buttonsIconsColor: Int, textLinksColor: Int) {
-        super.drawAdvancedColor(headerColor, buttonsIconsColor, textLinksColor)
-        binding.toolbar.setBackgroundColor(headerColor)
-    }
-
-    override fun attachDagger() {
-        super.attachDagger()
-        SDKApplication.getInstance().mediaComponent()?.inject(this)
     }
 
     override fun receiveExtras() {
@@ -147,10 +124,10 @@ internal class MediaPickerItemFragment :
         binding.toolbar.title = ""
         (activity as AppCompatActivity).setSupportActionBar(binding.toolbar)
 
-        binding.textViewToolbarTitle.text = mediaPickerItemExtras.folderTitle
+        binding.tvToolbarTitle.text = mediaPickerItemExtras.folderTitle
 
         mediaPickerAdapter = MediaPickerAdapter(this)
-        binding.recyclerView.apply {
+        binding.rvMediaItem.apply {
             val mLayoutManager = GridLayoutManager(requireContext(), 3)
             mLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
@@ -189,7 +166,7 @@ internal class MediaPickerItemFragment :
         if (selectedMedias.size > 0) {
             actionModeCallback?.updateTitle("${selectedMedias.size} selected")
         } else {
-            actionModeCallback?.updateTitle("Tap photo to select")
+            actionModeCallback?.updateTitle(requireContext().getString(R.string.tap_photo_to_select))
         }
     }
 
@@ -211,10 +188,10 @@ internal class MediaPickerItemFragment :
     }
 
     override fun onMediaItemLongClicked(mediaViewData: MediaViewData, itemPosition: Int) {
-        if (selectedMedias.containsKey(mediaViewData.uri().toString())) {
-            selectedMedias.remove(mediaViewData.uri().toString())
+        if (selectedMedias.containsKey(mediaViewData.uri.toString())) {
+            selectedMedias.remove(mediaViewData.uri.toString())
         } else {
-            selectedMedias[mediaViewData.uri().toString()] = mediaViewData
+            selectedMedias[mediaViewData.uri.toString()] = mediaViewData
         }
 
         mediaPickerAdapter.notifyItemChanged(itemPosition)

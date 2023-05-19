@@ -27,14 +27,6 @@ internal class MediaActivity : BaseAppCompatActivity() {
                 val mediaExtras = bundle.getParcelable<MediaExtras>(BUNDLE_MEDIA_EXTRAS)
                 if (mediaExtras != null) {
                     when (mediaExtras.mediaScreenType) {
-                        MEDIA_VERTICAL_LIST_SCREEN -> {
-                            initActionBar(mediaExtras, R.style.AppTheme_Black)
-                            val args = Bundle().apply {
-                                putParcelable(ARG_MEDIA_EXTRAS, mediaExtras)
-                            }
-                            navGraph.setStartDestination(R.id.mediaVerticalListFragment)
-                            navController.setGraph(navGraph, args)
-                        }
                         MEDIA_EDIT_SCREEN -> {
                             initActionBar(mediaExtras, R.style.AppTheme_Black)
                             val args = Bundle().apply {

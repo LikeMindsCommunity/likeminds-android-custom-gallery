@@ -8,7 +8,7 @@ import com.google.android.exoplayer2.DefaultLoadControl
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
-import com.likeminds.customgallery.utils.ViewUtils
+import com.likeminds.customgallery.utils.DateUtil
 
 internal class LMMediaPlayer(
     private val context: Context,
@@ -48,7 +48,7 @@ internal class LMMediaPlayer(
     private fun currentDurationInInt() = ((mediaPlayer.currentPosition) / 1000).toInt()
 
     private fun getCurrentDurationInString() =
-        ViewUtils.formatSeconds(((mediaPlayer.currentPosition) / 1000).toInt())
+        DateUtil.formatSeconds(((mediaPlayer.currentPosition) / 1000).toInt())
 
     fun playedPercentage(): Int {
         return ((mediaPlayer.currentPosition.toDouble() / mediaPlayer.duration.toDouble()) * 100).toInt()

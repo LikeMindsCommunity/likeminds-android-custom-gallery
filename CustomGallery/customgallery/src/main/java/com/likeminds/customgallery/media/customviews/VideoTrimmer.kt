@@ -18,7 +18,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.SeekBar
-import com.collabmates.fileutil.FileUtil
 import com.likeminds.customgallery.databinding.LayoutVideoTrimmerBinding
 import com.likeminds.customgallery.media.customviews.interfaces.OnProgressVideoListener
 import com.likeminds.customgallery.media.customviews.interfaces.OnRangeSeekBarListener
@@ -29,6 +28,7 @@ import com.likeminds.customgallery.media.util.BackgroundExecutor
 import com.likeminds.customgallery.media.util.Mp4Cutter
 import com.likeminds.customgallery.media.util.TrimVideoUtils
 import com.likeminds.customgallery.media.util.UiThreadExecutor
+import com.likeminds.customgallery.utils.file.util.FileUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

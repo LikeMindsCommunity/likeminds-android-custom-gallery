@@ -113,7 +113,6 @@
             android:includeFontPadding="false"
             android:textColor="@color/brown_grey"
             android:textSize="14sp"
-            app:fontType="regular"
             app:layout_constraintBottom_toTopOf="@+id/divider"
             app:layout_constraintStart_toEndOf="@+id/iv_duration_dot"
             app:layout_constraintTop_toBottomOf="@id/tv_audio_name"

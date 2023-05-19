@@ -5,22 +5,19 @@ import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.widget.PopupMenu
-import com.collabmates.sdk.sdk.SDKPreferences
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.likeminds.customgallery.R
-import com.likeminds.customgallery.SDKApplication
-import com.likeminds.customgallery.base.BaseFragment
 import com.likeminds.customgallery.databinding.FragmentPlayVideoBinding
 import com.likeminds.customgallery.media.model.MediaExtras
 import com.likeminds.customgallery.media.model.MediaSwipeViewData
 import com.likeminds.customgallery.media.model.VIDEO
 import com.likeminds.customgallery.media.util.MediaViewUtils
 import com.likeminds.customgallery.media.viewmodel.MediaViewModel
-import javax.inject.Inject
+import com.likeminds.customgallery.utils.customview.BaseFragment
 
 internal class PlayVideoFragment : BaseFragment<FragmentPlayVideoBinding, MediaViewModel>() {
 
@@ -28,9 +25,6 @@ internal class PlayVideoFragment : BaseFragment<FragmentPlayVideoBinding, MediaV
 
     private var videoPlayer: ExoPlayer? = null
     private var overflowMenu: PopupMenu? = null
-
-    @Inject
-    lateinit var sdkPreferences: SDKPreferences
 
     companion object {
         private const val SCREEN_RECORD = "screen_record"
@@ -61,16 +55,9 @@ internal class PlayVideoFragment : BaseFragment<FragmentPlayVideoBinding, MediaV
         mediaExtras = PlayVideoFragmentArgs.fromBundle(requireArguments()).mediaExtras
     }
 
-    override fun attachDagger() {
-        super.attachDagger()
-        SDKApplication.getInstance().mediaComponent()?.inject(this)
-    }
-
     override fun setUpViews() {
         super.setUpViews()
         initPlayer()
-        observeCommunity()
-        getCommunity()
         binding.buttonBack.setOnClickListener {
             activity?.finish()
         }
@@ -81,15 +68,9 @@ internal class PlayVideoFragment : BaseFragment<FragmentPlayVideoBinding, MediaV
 
     private fun initPlayer() {
         mediaExtras.medias?.firstOrNull()?.let { mediaSwipeViewData ->
-            binding.textTitle.text = mediaSwipeViewData.title()
+            binding.textTitle.text = mediaSwipeViewData.title
             binding.textSubTitle.text = getSubTitle(mediaSwipeViewData)
-            viewModel.sendVideoPlayedEvent(
-                mediaExtras.chatroomId,
-                mediaExtras.communityId.toString(),
-                mediaExtras.conversationId,
-                mediaSwipeViewData.type()
-            )
-            mediaSwipeViewData.uri()?.let { videoUri ->
+            mediaSwipeViewData.uri.let { videoUri ->
                 videoPlayer = ExoPlayer.Builder(requireContext()).build()
                 binding.playerView.player = videoPlayer
                 buildMediaSource(videoUri).let { mediaSource ->
@@ -97,16 +78,6 @@ internal class PlayVideoFragment : BaseFragment<FragmentPlayVideoBinding, MediaV
                     videoPlayer?.prepare()
                 }
             }
-        }
-    }
-
-    private fun getCommunity() {
-        mediaExtras.communityId?.let { viewModel.getCommunity(it) }
-    }
-
-    private fun observeCommunity() {
-        viewModel.communityLiveData.observe(viewLifecycleOwner) { communityViewData ->
-            handleOverflowMenuIcon(communityViewData.downloadableContentType())
         }
     }
 
@@ -143,17 +114,17 @@ internal class PlayVideoFragment : BaseFragment<FragmentPlayVideoBinding, MediaV
 
     private fun saveToGallery() {
         val media = mediaExtras.medias?.firstOrNull() ?: return
-        val notificationIcon = sdkPreferences.getNotificationIcon()
+        val notificationIcon = R.drawable.ic_notification
         MediaViewUtils.saveToGallery(
             viewLifecycleOwner,
             requireActivity(),
-            media.uri(),
+            media.uri,
             notificationIcon
         )
     }
 
     private fun getSubTitle(mediaSwipeViewData: MediaSwipeViewData?): String? {
-        var subTitle = mediaSwipeViewData?.subTitle()
+        var subTitle = mediaSwipeViewData?.subTitle
 
         // Remove comma in start if added
         if (subTitle?.startsWith(",") == true && subTitle.length > 1) {
@@ -178,5 +149,4 @@ internal class PlayVideoFragment : BaseFragment<FragmentPlayVideoBinding, MediaV
         videoPlayer?.playWhenReady = false
         videoPlayer?.release()
     }
-
 }

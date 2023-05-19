@@ -10,13 +10,13 @@ import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.util.Log
 import androidx.core.content.res.ResourcesCompat
-import com.collabmates.fileutil.FileUtil
-import com.collabmates.fileutil.isLargeFile
-import com.collabmates.fileutil.utils.MemoryUnitFormat
 import com.likeminds.customgallery.R
 import com.likeminds.customgallery.media.model.MediaViewData
 import com.likeminds.customgallery.media.model.SingleUriData
 import com.likeminds.customgallery.utils.ViewUtils
+import com.likeminds.customgallery.utils.file.util.FileUtil
+import com.likeminds.customgallery.utils.file.util.MemoryUnitFormat
+import com.likeminds.customgallery.utils.file.util.isLargeFile
 import java.io.InputStream
 
 internal object MediaUtils {
@@ -100,17 +100,17 @@ internal object MediaUtils {
 
         if (!medias.isNullOrEmpty()) {
             medias.forEach { mediaViewData ->
-                if (!mediaViewData.size().isLargeFile) {
+                if (!mediaViewData.size.isLargeFile) {
                     mediaUris.add(
-                        SingleUriData.builder()
-                            .mediaName(mediaViewData.mediaName())
-                            .uri(mediaViewData.uri())
-                            .fileType(mediaViewData.mediaType())
-                            .size(mediaViewData.size())
-                            .duration(mediaViewData.duration())
-                            .mediaName(mediaViewData.mediaName())
-                            .duration(mediaViewData.duration())
-                            .pdfPageCount(mediaViewData.pdfPageCount())
+                        SingleUriData.Builder()
+                            .mediaName(mediaViewData.mediaName)
+                            .uri(mediaViewData.uri)
+                            .fileType(mediaViewData.mediaType)
+                            .size(mediaViewData.size)
+                            .duration(mediaViewData.duration)
+                            .mediaName(mediaViewData.mediaName)
+                            .duration(mediaViewData.duration)
+                            .pdfPageCount(mediaViewData.pdfPageCount)
                             .build()
                     )
                 } else {

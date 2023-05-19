@@ -5,7 +5,6 @@ import android.content.Context
 import android.media.*
 import android.net.Uri
 import android.util.SparseIntArray
-import com.collabmates.fileutil.FileUtil
 import com.googlecode.mp4parser.FileDataSourceViaHeapImpl
 import com.googlecode.mp4parser.authoring.Track
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder
@@ -13,6 +12,7 @@ import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator
 import com.googlecode.mp4parser.authoring.tracks.CroppedTrack
 import com.likeminds.customgallery.media.customviews.interfaces.OnTrimVideoListener
 import com.likeminds.customgallery.media.model.VideoTrimExtras
+import com.likeminds.customgallery.utils.file.util.FileUtil
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
