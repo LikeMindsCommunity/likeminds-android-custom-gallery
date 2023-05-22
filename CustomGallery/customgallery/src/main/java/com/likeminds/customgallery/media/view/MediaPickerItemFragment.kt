@@ -1,7 +1,6 @@
 package com.likeminds.customgallery.media.view
 
 import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -225,28 +224,21 @@ internal class MediaPickerItemFragment :
 
     private fun sendSelectedMedia(medias: List<MediaViewData>) {
         val extra = MediaPickerResult.Builder()
-            .isResultOk(true)
             .mediaPickerResultType(MEDIA_RESULT_PICKED)
             .mediaTypes(mediaPickerItemExtras.mediaTypes)
             .allowMultipleSelect(mediaPickerItemExtras.allowMultipleSelect)
             .medias(medias)
             .build()
+
         val mediaUris =
             MediaUtils.convertMediaViewDataToSingleUriData(requireContext(), extra.medias)
         if (mediaUris.isNotEmpty() && mediaPickerItemExtras.isEditingAllowed) {
             showPickImagesListScreen(mediaUris)
         } else {
-            val customGalleryResult = CustomGalleryResult.Builder()
-                .medias(mediaUris)
-                .text(mediaPickerItemExtras.text)
-                .build()
-            val intent = Intent().apply {
-                putExtras(Bundle().apply {
-                    putParcelable(CustomGallery.ARG_CUSTOM_GALLERY_RESULT, customGalleryResult)
-                })
-            }
-            requireActivity().setResult(Activity.RESULT_OK, intent)
-            requireActivity().finish()
+            setResultAndFinish(
+                mediaUris,
+                mediaPickerItemExtras.text
+            )
         }
     }
 
@@ -255,19 +247,24 @@ internal class MediaPickerItemFragment :
             if (result.resultCode == Activity.RESULT_OK) {
                 val data = result.data?.extras?.getParcelable<MediaExtras>(BUNDLE_MEDIA_EXTRAS)
                     ?: return@registerForActivityResult
-                val customGalleryResult = CustomGalleryResult.Builder()
-                    .medias(data.mediaUris?.toList() ?: listOf())
-                    .text(data.text)
-                    .build()
-                val intent = Intent().apply {
-                    putExtras(Bundle().apply {
-                        putParcelable(CustomGallery.ARG_CUSTOM_GALLERY_RESULT, customGalleryResult)
-                    })
-                }
-                requireActivity().setResult(Activity.RESULT_OK, intent)
-                requireActivity().finish()
+                setResultAndFinish(
+                    data.mediaUris?.toList() ?: listOf(),
+                    data.text
+                )
             }
         }
+
+    private fun setResultAndFinish(
+        mediaUris: List<SingleUriData>,
+        text: String?
+    ) {
+        val resultIntent = CustomGallery.getResultIntent(
+            mediaUris,
+            text
+        )
+        requireActivity().setResult(Activity.RESULT_OK, resultIntent)
+        requireActivity().finish()
+    }
 
     private fun showPickImagesListScreen(
         medias: List<SingleUriData>,

@@ -2,7 +2,6 @@ package com.likeminds.customgallery.media.viewmodel
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -35,10 +34,6 @@ internal class MediaViewModel constructor(
 
     fun getDocumentPreview(): LiveData<List<SingleUriData>> {
         return documentPreviewLiveData
-    }
-
-    private fun onError(e: Throwable) {
-        Log.e("MediaViewModel", "fetch - ", e)
     }
 
     /**
@@ -141,10 +136,6 @@ internal class MediaViewModel constructor(
             sortDocumentsByName()
         }
         return localDocumentFiles
-    }
-
-    fun fetchUriDetail(context: Context, uri: Uri, callback: (media: MediaViewData?) -> Unit) {
-        mediaRepository.getLocalUriDetail(context, uri, callback)
     }
 
     fun fetchUriDetails(

@@ -1,7 +1,6 @@
 package com.likeminds.customgallery.media.view
 
 import android.app.Activity
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -16,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.SimpleItemAnimator
-import com.likeminds.customgallery.CustomGallery.ARG_CUSTOM_GALLERY_RESULT
+import com.likeminds.customgallery.CustomGallery
 import com.likeminds.customgallery.R
 import com.likeminds.customgallery.databinding.FragmentMediaPickerAudioBinding
 import com.likeminds.customgallery.media.model.*
@@ -351,17 +350,10 @@ internal class MediaPickerAudioFragment :
         if (mediaUris.isNotEmpty() && mediaPickerExtras.isEditingAllowed) {
             showPickAudioListScreen(mediaUris)
         } else {
-            val customGalleryResult = CustomGalleryResult.Builder()
-                .medias(mediaUris)
-                .text(mediaPickerExtras.text)
-                .build()
-            val intent = Intent().apply {
-                putExtras(Bundle().apply {
-                    putParcelable(ARG_CUSTOM_GALLERY_RESULT, customGalleryResult)
-                })
-            }
-            requireActivity().setResult(Activity.RESULT_OK, intent)
-            requireActivity().finish()
+            setResultAndFinish(
+                mediaUris,
+                mediaPickerExtras.text
+            )
         }
     }
 
@@ -370,19 +362,24 @@ internal class MediaPickerAudioFragment :
             if (result.resultCode == Activity.RESULT_OK) {
                 val data = result.data?.extras?.getParcelable<MediaExtras>(BUNDLE_MEDIA_EXTRAS)
                     ?: return@registerForActivityResult
-                val customGalleryResult = CustomGalleryResult.Builder()
-                    .medias(data.mediaUris?.toList() ?: listOf())
-                    .text(data.text)
-                    .build()
-                val intent = Intent().apply {
-                    putExtras(Bundle().apply {
-                        putParcelable(ARG_CUSTOM_GALLERY_RESULT, customGalleryResult)
-                    })
-                }
-                requireActivity().setResult(Activity.RESULT_OK, intent)
-                requireActivity().finish()
+                setResultAndFinish(
+                    data.mediaUris?.toList() ?: listOf(),
+                    data.text
+                )
             }
         }
+
+    private fun setResultAndFinish(
+        mediaUris: List<SingleUriData>,
+        text: String?
+    ) {
+        val resultIntent = CustomGallery.getResultIntent(
+            mediaUris,
+            text
+        )
+        requireActivity().setResult(Activity.RESULT_OK, resultIntent)
+        requireActivity().finish()
+    }
 
     private fun showPickAudioListScreen(
         medias: List<SingleUriData>,

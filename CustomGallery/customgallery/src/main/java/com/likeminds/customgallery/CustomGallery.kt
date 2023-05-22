@@ -2,11 +2,9 @@ package com.likeminds.customgallery
 
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import androidx.activity.result.ActivityResultLauncher
-import com.likeminds.customgallery.media.model.AUDIO
-import com.likeminds.customgallery.media.model.CustomGalleryConfig
-import com.likeminds.customgallery.media.model.MediaPickerExtras
-import com.likeminds.customgallery.media.model.PDF
+import com.likeminds.customgallery.media.model.*
 import com.likeminds.customgallery.media.view.MediaPickerActivity
 
 object CustomGallery {
@@ -45,6 +43,25 @@ object CustomGallery {
                 val intent = MediaPickerActivity.getIntent(context, extras)
                 launcher.launch(intent)
             }
+        }
+    }
+
+    // returns result intent with provided [mediaUris] and [text]
+    fun getResultIntent(
+        mediaUris: List<SingleUriData>,
+        text: String?
+    ): Intent {
+        val customGalleryResult = CustomGalleryResult.Builder()
+            .medias(mediaUris)
+            .text(text)
+            .build()
+        return Intent().apply {
+            putExtras(Bundle().apply {
+                putParcelable(
+                    ARG_CUSTOM_GALLERY_RESULT,
+                    customGalleryResult
+                )
+            })
         }
     }
 }

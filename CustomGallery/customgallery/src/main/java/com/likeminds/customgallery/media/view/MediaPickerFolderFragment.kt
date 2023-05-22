@@ -2,7 +2,6 @@ package com.likeminds.customgallery.media.view
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -99,20 +98,10 @@ internal class MediaPickerFolderFragment :
                             saveInCache = true
                         )
                     } else {
-                        val customGalleryResult = CustomGalleryResult.Builder()
-                            .medias(mediaUris)
-                            .text(mediaPickerExtras.text)
-                            .build()
-                        val intent = Intent().apply {
-                            putExtras(Bundle().apply {
-                                putParcelable(
-                                    CustomGallery.ARG_CUSTOM_GALLERY_RESULT,
-                                    customGalleryResult
-                                )
-                            })
-                        }
-                        requireActivity().setResult(Activity.RESULT_OK, intent)
-                        requireActivity().finish()
+                        setResultAndFinish(
+                            mediaUris,
+                            mediaPickerExtras.text
+                        )
                     }
                 }
             }
@@ -124,19 +113,24 @@ internal class MediaPickerFolderFragment :
                 val data =
                     result.data?.extras?.getParcelable<MediaExtras>(MediaActivity.BUNDLE_MEDIA_EXTRAS)
                         ?: return@registerForActivityResult
-                val customGalleryResult = CustomGalleryResult.Builder()
-                    .medias(data.mediaUris?.toList() ?: listOf())
-                    .text(data.text)
-                    .build()
-                val intent = Intent().apply {
-                    putExtras(Bundle().apply {
-                        putParcelable(CustomGallery.ARG_CUSTOM_GALLERY_RESULT, customGalleryResult)
-                    })
-                }
-                requireActivity().setResult(Activity.RESULT_OK, intent)
-                requireActivity().finish()
+                setResultAndFinish(
+                    data.mediaUris?.toList() ?: listOf(),
+                    data.text
+                )
             }
         }
+
+    private fun setResultAndFinish(
+        mediaUris: List<SingleUriData>,
+        text: String?
+    ) {
+        val resultIntent = CustomGallery.getResultIntent(
+            mediaUris,
+            text
+        )
+        requireActivity().setResult(Activity.RESULT_OK, resultIntent)
+        requireActivity().finish()
+    }
 
     private fun showPickImagesListScreen(
         medias: List<SingleUriData>,

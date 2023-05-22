@@ -185,7 +185,7 @@ class MediaRepository {
 
         val cameraBucketId = imageFolders?.cameraBucketId ?: videoFolders?.cameraBucketId
         val allMediaThumbnail =
-            if (imageFolders?.thumbnailTimestamp ?: 0 > videoFolders?.thumbnailTimestamp ?: 0) {
+            if ((imageFolders?.thumbnailTimestamp ?: 0) > (videoFolders?.thumbnailTimestamp ?: 0)) {
                 imageFolders?.thumbnail
             } else {
                 videoFolders?.thumbnail

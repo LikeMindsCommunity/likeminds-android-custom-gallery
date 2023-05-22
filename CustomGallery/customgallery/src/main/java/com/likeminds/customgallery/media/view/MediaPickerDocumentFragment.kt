@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import com.likeminds.customgallery.CustomGallery
 import com.likeminds.customgallery.CustomGallery.ARG_CUSTOM_GALLERY_RESULT
 import com.likeminds.customgallery.R
 import com.likeminds.customgallery.databinding.FragmentMediaPickerDocumentBinding
@@ -144,17 +145,10 @@ internal class MediaPickerDocumentFragment() :
         if (mediaUris.isNotEmpty() && mediaPickerExtras.isEditingAllowed) {
             showPickDocumentsListScreen(*mediaUris.toTypedArray())
         } else {
-            val customGalleryResult = CustomGalleryResult.Builder()
-                .medias(mediaUris)
-                .text(mediaPickerExtras.text)
-                .build()
-            val intent = Intent().apply {
-                putExtras(Bundle().apply {
-                    putParcelable(ARG_CUSTOM_GALLERY_RESULT, customGalleryResult)
-                })
-            }
-            requireActivity().setResult(Activity.RESULT_OK, intent)
-            requireActivity().finish()
+            setResultAndFinish(
+                mediaUris,
+                mediaPickerExtras.text
+            )
         }
     }
 
@@ -163,21 +157,26 @@ internal class MediaPickerDocumentFragment() :
             if (result.resultCode == Activity.RESULT_OK) {
                 val data = result.data?.extras?.getParcelable<MediaExtras>(BUNDLE_MEDIA_EXTRAS)
                     ?: return@registerForActivityResult
-                val customGalleryResult = CustomGalleryResult.Builder()
-                    .medias(data.mediaUris?.toList() ?: listOf())
-                    .text(data.text)
-                    .build()
-                val intent = Intent().apply {
-                    putExtras(Bundle().apply {
-                        putParcelable(ARG_CUSTOM_GALLERY_RESULT, customGalleryResult)
-                    })
-                }
-                requireActivity().setResult(Activity.RESULT_OK, intent)
-                requireActivity().finish()
+                setResultAndFinish(
+                    data.mediaUris?.toList() ?: listOf(),
+                    data.text
+                )
             } else if (result?.resultCode == Activity.RESULT_FIRST_USER) {
                 requireActivity().finish()
             }
         }
+
+    private fun setResultAndFinish(
+        mediaUris: List<SingleUriData>,
+        text: String?
+    ) {
+        val resultIntent = CustomGallery.getResultIntent(
+            mediaUris,
+            text
+        )
+        requireActivity().setResult(Activity.RESULT_OK, resultIntent)
+        requireActivity().finish()
+    }
 
     private fun showPickDocumentsListScreen(
         vararg mediaUris: SingleUriData,

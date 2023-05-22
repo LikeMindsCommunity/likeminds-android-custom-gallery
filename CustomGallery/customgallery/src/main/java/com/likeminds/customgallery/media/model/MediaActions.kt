@@ -12,6 +12,5 @@ const val MEDIA_ACTION_NONE = "none"
     MEDIA_ACTION_NONE
 )
 
-
 @Retention(AnnotationRetention.SOURCE)
 internal annotation class MediaActions

@@ -65,20 +65,10 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
                     if (mediaUris.isNotEmpty() && mediaPickerExtras.isEditingAllowed) {
                         showPickDocumentsListScreen(mediaUris)
                     } else {
-                        val customGalleryResult = CustomGalleryResult.Builder()
-                            .medias(mediaUris)
-                            .text(mediaPickerExtras.text)
-                            .build()
-                        val intent = Intent().apply {
-                            putExtras(Bundle().apply {
-                                putParcelable(
-                                    CustomGallery.ARG_CUSTOM_GALLERY_RESULT,
-                                    customGalleryResult
-                                )
-                            })
-                        }
-                        setResult(Activity.RESULT_OK, intent)
-                        finish()
+                        setResultAndFinish(
+                            mediaUris,
+                            mediaPickerExtras.text
+                        )
                     }
                 }
             }
@@ -90,21 +80,26 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
                 val data =
                     result.data?.extras?.getParcelable<MediaExtras>(BUNDLE_MEDIA_EXTRAS)
                         ?: return@registerForActivityResult
-                val customGalleryResult = CustomGalleryResult.Builder()
-                    .medias(data.mediaUris?.toList() ?: listOf())
-                    .text(data.text)
-                    .build()
-                val intent = Intent().apply {
-                    putExtras(Bundle().apply {
-                        putParcelable(CustomGallery.ARG_CUSTOM_GALLERY_RESULT, customGalleryResult)
-                    })
-                }
-                setResult(Activity.RESULT_OK, intent)
-                finish()
+                setResultAndFinish(
+                    data.mediaUris?.toList() ?: listOf(),
+                    data.text
+                )
             } else if (result?.resultCode == Activity.RESULT_FIRST_USER) {
                 finish()
             }
         }
+
+    private fun setResultAndFinish(
+        media: List<SingleUriData>,
+        text: String?
+    ) {
+        val resultIntent = CustomGallery.getResultIntent(
+            media,
+            text
+        )
+        setResult(Activity.RESULT_OK, resultIntent)
+        finish()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
