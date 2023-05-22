@@ -259,6 +259,7 @@ internal class MediaPickerItemFragment :
         text: String?
     ) {
         val resultIntent = CustomGallery.getResultIntent(
+            mediaPickerItemExtras.mediaTypes,
             mediaUris,
             text
         )

@@ -48,6 +48,7 @@ object CustomGallery {
 
     // returns result intent with provided [mediaUris] and [text]
     fun getResultIntent(
+        @MediaType mediaTypes: List<String>,
         mediaUris: List<SingleUriData>,
         text: String?
     ): Intent {

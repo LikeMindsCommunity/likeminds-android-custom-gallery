@@ -25,12 +25,6 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
     private lateinit var mediaPickerExtras: MediaPickerExtras
 
     companion object {
-        const val PICK_MEDIA = 5001
-        const val BROWSE_MEDIA = 5002
-        const val BROWSE_DOCUMENT = 5003
-        const val PICK_CAMERA = 5004
-        const val CROP_IMAGE = 5005
-
         private const val ARG_MEDIA_PICKER_EXTRAS = "mediaPickerExtras"
         const val ARG_MEDIA_PICKER_RESULT = "mediaPickerResult"
 
@@ -71,6 +65,8 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
                         )
                     }
                 }
+            } else if (result?.resultCode == Activity.RESULT_FIRST_USER) {
+                finish()
             }
         }
 
@@ -94,6 +90,7 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
         text: String?
     ) {
         val resultIntent = CustomGallery.getResultIntent(
+            mediaPickerExtras.mediaTypes,
             media,
             text
         )
@@ -177,6 +174,7 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
                 allowMultipleSelect = mediaPickerExtras.allowMultipleSelect
             )
             browserMediaLauncher.launch(intent)
+            finish()
             return true
         }
         return false

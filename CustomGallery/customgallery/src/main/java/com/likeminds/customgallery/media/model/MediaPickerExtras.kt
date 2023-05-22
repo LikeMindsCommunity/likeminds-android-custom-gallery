@@ -6,7 +6,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal class MediaPickerExtras private constructor(
     val senderName: String?,
-    @MediaType var mediaTypes: List<String>,
+    @MediaType val mediaTypes: List<String>,
     val allowMultipleSelect: Boolean,
     val isEditingAllowed: Boolean,
     val text: String?
