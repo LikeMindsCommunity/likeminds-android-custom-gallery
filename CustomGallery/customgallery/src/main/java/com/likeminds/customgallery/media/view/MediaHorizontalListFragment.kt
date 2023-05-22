@@ -204,10 +204,7 @@ internal class MediaHorizontalListFragment :
 
     override fun onVideoClicked(mediaSwipeViewData: MediaSwipeViewData) {
         val extra = MediaExtras.Builder()
-            .communityId(mediaExtras.communityId)
             .mediaScreenType(MEDIA_VIDEO_PLAY_SCREEN)
-            .chatroomId(mediaExtras.chatroomId)
-            .conversationId(mediaExtras.conversationId)
             .medias(
                 listOf(
                     MediaSwipeViewData.Builder()

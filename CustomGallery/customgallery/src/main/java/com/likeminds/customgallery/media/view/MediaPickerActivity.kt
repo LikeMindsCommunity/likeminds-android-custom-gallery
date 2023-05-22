@@ -5,12 +5,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.NavHostFragment
+import com.likeminds.customgallery.CustomGallery
 import com.likeminds.customgallery.R
-import com.likeminds.customgallery.media.model.MEDIA_RESULT_BROWSE
-import com.likeminds.customgallery.media.model.MediaPickerExtras
-import com.likeminds.customgallery.media.model.MediaPickerResult
-import com.likeminds.customgallery.media.model.MediaType
+import com.likeminds.customgallery.media.MediaRepository
+import com.likeminds.customgallery.media.model.*
+import com.likeminds.customgallery.media.util.MediaUtils
+import com.likeminds.customgallery.utils.AndroidUtil
 import com.likeminds.customgallery.utils.ViewUtils.currentFragment
 import com.likeminds.customgallery.utils.customview.BaseAppCompatActivity
 import com.likeminds.customgallery.utils.permissions.Permission
@@ -50,6 +52,49 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
         }
     }
 
+    private val browserMediaLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val uris = MediaUtils.getExternalIntentPickerUris(result.data)
+                val mediaRepository = MediaRepository()
+                mediaRepository.getLocalUrisDetails(this, uris) {
+                    val mediaUris = MediaUtils.convertMediaViewDataToSingleUriData(
+                        this, it
+                    )
+                    if (mediaUris.isNotEmpty()) {
+                        showPickDocumentsListScreen(
+                            *mediaUris.toTypedArray(),
+                            saveInCache = true
+                        )
+                    }
+                }
+                setResult(Activity.RESULT_OK, intent)
+                finish()
+            }
+        }
+
+    private val documentSendLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data =
+                    result.data?.extras?.getParcelable<MediaExtras>(MediaActivity.BUNDLE_MEDIA_EXTRAS)
+                        ?: return@registerForActivityResult
+                val customGalleryResult = CustomGalleryResult.Builder()
+                    .medias(data.mediaUris?.toList() ?: listOf())
+                    .text(data.text)
+                    .build()
+                val intent = Intent().apply {
+                    putExtras(Bundle().apply {
+                        putParcelable(CustomGallery.ARG_CUSTOM_GALLERY_RESULT, customGalleryResult)
+                    })
+                }
+                setResult(Activity.RESULT_OK, intent)
+                finish()
+            } else if (result?.resultCode == Activity.RESULT_FIRST_USER) {
+                finish()
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_media_picker)
@@ -84,55 +129,76 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
     }
 
     private fun startMediaPickerFragment() {
-        checkIfDocumentPickerInitiated()
+        val systemDocumentInitiated = checkIfDocumentPickerInitiated()
 
-        val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.nav_host) as? NavHostFragment ?: return
-        val graphInflater = navHostFragment.navController.navInflater
-        val navGraph = graphInflater.inflate(R.navigation.nav_media_picker_graph)
-        val navController = navHostFragment.navController
+        if (!systemDocumentInitiated) {
+            val navHostFragment =
+                supportFragmentManager.findFragmentById(R.id.nav_host) as? NavHostFragment ?: return
+            val graphInflater = navHostFragment.navController.navInflater
+            val navGraph = graphInflater.inflate(R.navigation.nav_media_picker_graph)
+            val navController = navHostFragment.navController
 
-        when {
-            MediaType.isImageOrVideo(mediaPickerExtras.mediaTypes) -> {
-                navGraph.setStartDestination(R.id.mediaPickerFolderFragment)
+            when {
+                MediaType.isImageOrVideo(mediaPickerExtras.mediaTypes) -> {
+                    navGraph.setStartDestination(R.id.mediaPickerFolderFragment)
+                }
+                MediaType.isPDF(mediaPickerExtras.mediaTypes) -> {
+                    navGraph.setStartDestination(R.id.mediaPickerDocumentFragment)
+                }
+                MediaType.isAudio(mediaPickerExtras.mediaTypes) -> {
+                    navGraph.setStartDestination(R.id.mediaPickerAudioFragment)
+                }
+                else -> {
+                    finish()
+                }
             }
-            MediaType.isPDF(mediaPickerExtras.mediaTypes) -> {
-                navGraph.setStartDestination(R.id.mediaPickerDocumentFragment)
+            val args = Bundle().apply {
+                putParcelable(ARG_MEDIA_PICKER_EXTRAS, mediaPickerExtras)
             }
-            MediaType.isAudio(mediaPickerExtras.mediaTypes) -> {
-                navGraph.setStartDestination(R.id.mediaPickerAudioFragment)
-            }
-            else -> {
-                finish()
-            }
+            navController.setGraph(navGraph, args)
         }
-        val args = Bundle().apply {
-            putParcelable(ARG_MEDIA_PICKER_EXTRAS, mediaPickerExtras)
-        }
-        navController.setGraph(navGraph, args)
     }
 
     /**
      * If Media Picker type is Pdf and device version is >= Q(29), then show system app picker.
      * This is done due to storage restrictions for non-media files in Android 10.
      * */
-    private fun checkIfDocumentPickerInitiated() {
+    private fun checkIfDocumentPickerInitiated(): Boolean {
         if (MediaType.isPDF(mediaPickerExtras.mediaTypes)
             && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
         ) {
-            val intent = Intent().apply {
-                putExtras(Bundle().apply {
-                    putParcelable(
-                        ARG_MEDIA_PICKER_RESULT, MediaPickerResult.Builder()
-                            .mediaPickerResultType(MEDIA_RESULT_BROWSE)
-                            .mediaTypes(mediaPickerExtras.mediaTypes)
-                            .allowMultipleSelect(mediaPickerExtras.allowMultipleSelect)
-                            .build()
-                    )
-                })
-            }
-            setResult(Activity.RESULT_OK, intent)
-            finish()
+            val intent = AndroidUtil.getExternalDocumentPickerIntent(
+                allowMultipleSelect = mediaPickerExtras.allowMultipleSelect
+            )
+            browserMediaLauncher.launch(intent)
+            return true
+        }
+        return false
+    }
+
+    private fun showPickDocumentsListScreen(
+        vararg mediaUris: SingleUriData,
+        saveInCache: Boolean = false,
+        isExternallyShared: Boolean = false,
+    ) {
+        val attachments = if (saveInCache) {
+            AndroidUtil.moveAttachmentToCache(this, *mediaUris)
+        } else {
+            mediaUris.asList()
+        }
+
+        val arrayList = ArrayList<SingleUriData>()
+        arrayList.addAll(attachments)
+
+        val mediaExtras = MediaExtras.Builder()
+            .mediaScreenType(MEDIA_DOCUMENT_SEND_SCREEN)
+            .mediaUris(arrayList)
+            .text(mediaPickerExtras.text)
+            .isExternallyShared(isExternallyShared)
+            .build()
+        if (attachments.isNotEmpty()) {
+            val intent = MediaActivity.getIntent(this, mediaExtras)
+            documentSendLauncher.launch(intent)
         }
     }
 

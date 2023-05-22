@@ -45,4 +45,5 @@
     <string name="select_multiple">Select multiple</string>
     <string name="audio_is_played">Audio is being played in chatroom</string>
     <string name="large_file_select_error_message">Files below 100 KB and above 100 MB are not allowed</string>
+    <string name="select_media">Select Media</string>
 </resources>

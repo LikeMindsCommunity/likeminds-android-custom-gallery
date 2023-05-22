@@ -1,6 +1,7 @@
 package com.likeminds.customgallery.utils.customview
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +9,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewbinding.ViewBinding
+import com.likeminds.customgallery.media.MediaRepository
+import com.likeminds.customgallery.media.viewmodel.MediaViewModelFactory
 
 abstract class BaseFragment<B : ViewBinding, VM : ViewModel> : Fragment() {
 
@@ -15,14 +18,11 @@ abstract class BaseFragment<B : ViewBinding, VM : ViewModel> : Fragment() {
     protected val binding get() = _binding!!
     private var hasInitializedRootView = false
 
-    lateinit var viewModelFactory: ViewModelProvider.Factory
     protected lateinit var viewModel: VM
 
     protected abstract fun getViewModelClass(): Class<VM>?
 
     protected abstract fun getViewBinding(): B
-
-    protected open val useSharedViewModel = false
 
     /**
      * set value to true, if we want to persist binding
@@ -96,10 +96,9 @@ abstract class BaseFragment<B : ViewBinding, VM : ViewModel> : Fragment() {
         if (getViewModelClass() == null) {
             return
         }
-        viewModel = if (useSharedViewModel) {
-            ViewModelProvider(requireActivity(), viewModelFactory)[getViewModelClass()!!]
-        } else {
-            ViewModelProvider(this, viewModelFactory)[getViewModelClass()!!]
-        }
+        val mediaRepository = MediaRepository()
+        val viewModelFactory = MediaViewModelFactory(mediaRepository)
+        Log.d("PUI", "init: ${getViewModelClass()}")
+        viewModel = ViewModelProvider(this, viewModelFactory)[getViewModelClass()!!]
     }
 }

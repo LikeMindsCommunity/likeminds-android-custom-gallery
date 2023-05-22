@@ -11,9 +11,12 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.likeminds.customgallery.CustomGallery.ARG_CUSTOM_GALLERY_RESULT
 import com.likeminds.customgallery.R
 import com.likeminds.customgallery.databinding.FragmentMediaPickerAudioBinding
 import com.likeminds.customgallery.media.model.*
@@ -22,9 +25,12 @@ import com.likeminds.customgallery.media.util.LMMediaPlayer.Companion.handler
 import com.likeminds.customgallery.media.util.LMMediaPlayer.Companion.isDataSourceSet
 import com.likeminds.customgallery.media.util.LMMediaPlayer.Companion.runnable
 import com.likeminds.customgallery.media.util.MediaPlayerListener
+import com.likeminds.customgallery.media.util.MediaUtils
+import com.likeminds.customgallery.media.view.MediaActivity.Companion.BUNDLE_MEDIA_EXTRAS
 import com.likeminds.customgallery.media.view.adapter.MediaPickerAdapter
 import com.likeminds.customgallery.media.view.adapter.MediaPickerAdapterListener
 import com.likeminds.customgallery.media.viewmodel.MediaViewModel
+import com.likeminds.customgallery.utils.AndroidUtil
 import com.likeminds.customgallery.utils.ViewUtils
 import com.likeminds.customgallery.utils.customview.BaseFragment
 import com.likeminds.customgallery.utils.search.CustomSearchBar
@@ -296,6 +302,9 @@ internal class MediaPickerAudioFragment :
     }
 
     private fun initializeSearchView() {
+        val searchBar = binding.searchBar
+        searchBar.initialize(lifecycleScope)
+
         binding.searchBar.setSearchViewListener(
             object : CustomSearchBar.SearchViewListener {
                 override fun onSearchViewClosed() {
@@ -337,19 +346,73 @@ internal class MediaPickerAudioFragment :
     }
 
     private fun sendSelectedMedias(medias: List<MediaViewData>) {
-        val extras = MediaPickerResult.Builder()
-            .mediaPickerResultType(MEDIA_RESULT_PICKED)
-            .mediaTypes(mediaPickerExtras.mediaTypes)
-            .allowMultipleSelect(mediaPickerExtras.allowMultipleSelect)
-            .medias(medias)
-            .build()
-        val intent = Intent().apply {
-            putExtras(Bundle().apply {
-                putParcelable(MediaPickerActivity.ARG_MEDIA_PICKER_RESULT, extras)
-            })
+        val mediaUris =
+            MediaUtils.convertMediaViewDataToSingleUriData(requireContext(), medias)
+        if (mediaUris.isNotEmpty() && mediaPickerExtras.isEditingAllowed) {
+            showPickAudioListScreen(mediaUris)
+        } else {
+            val customGalleryResult = CustomGalleryResult.Builder()
+                .medias(mediaUris)
+                .text(mediaPickerExtras.text)
+                .build()
+            val intent = Intent().apply {
+                putExtras(Bundle().apply {
+                    putParcelable(ARG_CUSTOM_GALLERY_RESULT, customGalleryResult)
+                })
+            }
+            requireActivity().setResult(Activity.RESULT_OK, intent)
+            requireActivity().finish()
         }
-        requireActivity().setResult(Activity.RESULT_OK, intent)
-        requireActivity().finish()
+    }
+
+    private val audioSendLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data = result.data?.extras?.getParcelable<MediaExtras>(BUNDLE_MEDIA_EXTRAS)
+                    ?: return@registerForActivityResult
+                val customGalleryResult = CustomGalleryResult.Builder()
+                    .medias(data.mediaUris?.toList() ?: listOf())
+                    .text(data.text)
+                    .build()
+                val intent = Intent().apply {
+                    putExtras(Bundle().apply {
+                        putParcelable(ARG_CUSTOM_GALLERY_RESULT, customGalleryResult)
+                    })
+                }
+                requireActivity().setResult(Activity.RESULT_OK, intent)
+                requireActivity().finish()
+            }
+        }
+
+    private fun showPickAudioListScreen(
+        medias: List<SingleUriData>,
+        saveInCache: Boolean = false,
+        isExternallyShared: Boolean = false,
+    ) {
+        val attachments = if (saveInCache) {
+            AndroidUtil.moveAttachmentToCache(requireContext(), *medias.toTypedArray())
+        } else {
+            medias
+        }
+
+        if (attachments.isNotEmpty()) {
+            val arrayList = java.util.ArrayList<SingleUriData>()
+            arrayList.addAll(attachments)
+
+            val mediaExtras = MediaExtras.Builder()
+                .mediaScreenType(MEDIA_AUDIO_EDIT_SEND_SCREEN)
+                .mediaUris(arrayList)
+                .text(mediaPickerExtras.text)
+                .isExternallyShared(isExternallyShared)
+                .build()
+            if (attachments.isNotEmpty()) {
+                val intent = MediaActivity.getIntent(
+                    requireContext(),
+                    mediaExtras
+                )
+                audioSendLauncher.launch(intent)
+            }
+        }
     }
 
     private fun clearSelectedMedias() {

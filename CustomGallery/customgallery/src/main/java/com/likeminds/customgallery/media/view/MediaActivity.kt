@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import androidx.navigation.fragment.NavHostFragment
 import com.likeminds.customgallery.R
@@ -15,6 +16,7 @@ internal class MediaActivity : BaseAppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_media)
+        Log.d("PUI", "onCreate: called")
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host) as? NavHostFragment ?: return

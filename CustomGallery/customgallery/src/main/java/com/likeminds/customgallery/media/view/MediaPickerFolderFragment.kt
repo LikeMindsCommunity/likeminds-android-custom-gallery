@@ -7,13 +7,15 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.navigation.fragment.findNavController
+import com.likeminds.customgallery.CustomGallery
 import com.likeminds.customgallery.R
 import com.likeminds.customgallery.databinding.FragmentMediaPickerFolderBinding
 import com.likeminds.customgallery.media.model.*
-import com.likeminds.customgallery.media.view.MediaPickerActivity.Companion.ARG_MEDIA_PICKER_RESULT
+import com.likeminds.customgallery.media.util.MediaUtils
 import com.likeminds.customgallery.media.view.adapter.MediaPickerAdapter
 import com.likeminds.customgallery.media.view.adapter.MediaPickerAdapterListener
 import com.likeminds.customgallery.media.viewmodel.MediaViewModel
@@ -32,8 +34,6 @@ internal class MediaPickerFolderFragment :
 
     companion object {
         const val BUNDLE_MEDIA_PICKER_FOLDER = "bundle of media picker folder"
-        const val REQUEST_KEY = "request key of media item"
-        const val RESULT_KEY = "result of media item"
         const val TAG = "MediaPickerFolder"
 
         @JvmStatic
@@ -85,32 +85,101 @@ internal class MediaPickerFolderFragment :
         }
     }
 
+    private val externalPickerLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val uris = MediaUtils.getExternalIntentPickerUris(result.data)
+                viewModel.fetchUriDetails(requireContext(), uris) {
+                    val mediaUris = MediaUtils.convertMediaViewDataToSingleUriData(
+                        requireContext(), it
+                    )
+                    if (mediaUris.isNotEmpty() && mediaPickerExtras.isEditingAllowed) {
+                        showPickImagesListScreen(
+                            mediaUris,
+                            saveInCache = true
+                        )
+                    } else {
+                        val customGalleryResult = CustomGalleryResult.Builder()
+                            .medias(mediaUris)
+                            .text(mediaPickerExtras.text)
+                            .build()
+                        val intent = Intent().apply {
+                            putExtras(Bundle().apply {
+                                putParcelable(
+                                    CustomGallery.ARG_CUSTOM_GALLERY_RESULT,
+                                    customGalleryResult
+                                )
+                            })
+                        }
+                        requireActivity().setResult(Activity.RESULT_OK, intent)
+                        requireActivity().finish()
+                    }
+                }
+            }
+        }
+
+    private var imageVideoSendLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data =
+                    result.data?.extras?.getParcelable<MediaExtras>(MediaActivity.BUNDLE_MEDIA_EXTRAS)
+                        ?: return@registerForActivityResult
+                val customGalleryResult = CustomGalleryResult.Builder()
+                    .medias(data.mediaUris?.toList() ?: listOf())
+                    .text(data.text)
+                    .build()
+                val intent = Intent().apply {
+                    putExtras(Bundle().apply {
+                        putParcelable(CustomGallery.ARG_CUSTOM_GALLERY_RESULT, customGalleryResult)
+                    })
+                }
+                requireActivity().setResult(Activity.RESULT_OK, intent)
+                requireActivity().finish()
+            }
+        }
+
+    private fun showPickImagesListScreen(
+        medias: List<SingleUriData>,
+        saveInCache: Boolean = false,
+        isExternallyShared: Boolean = false
+    ) {
+        val attachments = if (saveInCache) {
+            AndroidUtil.moveAttachmentToCache(requireContext(), *medias.toTypedArray())
+        } else {
+            medias
+        }
+        if (attachments.isNotEmpty()) {
+            val arrayList = ArrayList<SingleUriData>()
+            arrayList.addAll(attachments)
+
+            val mediaExtras = MediaExtras.Builder()
+                .mediaScreenType(MEDIA_EDIT_SCREEN)
+                .mediaUris(arrayList)
+                .text(mediaPickerExtras.text)
+                .isExternallyShared(isExternallyShared)
+                .build()
+
+            val intent =
+                MediaActivity.getIntent(requireContext(), mediaExtras)
+            imageVideoSendLauncher.launch(intent)
+        }
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val localAppData = appsList.find {
             it.appId == item.itemId
         }
 
         return if (localAppData != null) {
-            val extra = MediaPickerResult.Builder()
-                .mediaPickerResultType(MEDIA_RESULT_BROWSE)
-                .mediaTypes(mediaPickerExtras.mediaTypes)
-                .allowMultipleSelect(mediaPickerExtras.allowMultipleSelect)
-                .browseClassName(
-                    Pair(
-                        localAppData.resolveInfo.activityInfo.applicationInfo.packageName,
-                        localAppData.resolveInfo.activityInfo.name
-                    )
+            val intent = AndroidUtil.getExternalPickerIntent(
+                mediaPickerExtras.mediaTypes,
+                mediaPickerExtras.allowMultipleSelect,
+                Pair(
+                    localAppData.resolveInfo.activityInfo.applicationInfo.packageName,
+                    localAppData.resolveInfo.activityInfo.name
                 )
-                .build()
-            val intent = Intent().apply {
-                putExtras(Bundle().apply {
-                    putParcelable(
-                        ARG_MEDIA_PICKER_RESULT, extra
-                    )
-                })
-            }
-            requireActivity().setResult(Activity.RESULT_OK, intent)
-            requireActivity().finish()
+            )
+            externalPickerLauncher.launch(intent)
             true
         } else {
             false
@@ -167,6 +236,8 @@ internal class MediaPickerFolderFragment :
             .folderTitle(folderData.title)
             .mediaTypes(mediaPickerExtras.mediaTypes)
             .allowMultipleSelect(mediaPickerExtras.allowMultipleSelect)
+            .text(mediaPickerExtras.text)
+            .isEditingAllowed(mediaPickerExtras.isEditingAllowed)
             .build()
 
         findNavController().navigate(

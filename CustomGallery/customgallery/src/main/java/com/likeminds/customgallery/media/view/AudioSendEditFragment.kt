@@ -88,6 +88,7 @@ internal class AudioSendEditFragment :
         createThumbnailFromAudio()
         initMediaPlayer()
         initAnimation()
+        initText()
         initListeners()
         checkForExternallyShared()
     }
@@ -99,6 +100,13 @@ internal class AudioSendEditFragment :
     private fun initAnimation() {
         progressAnim = ObjectAnimator.ofFloat(binding.wave, "progress", 0F, 100F).apply {
             interpolator = LinearInterpolator()
+        }
+    }
+
+    private fun initText() {
+        binding.etConversation.apply {
+            setText(mediaExtras.text)
+            setSelection(length())
         }
     }
 
@@ -176,7 +184,7 @@ internal class AudioSendEditFragment :
 
         binding.buttonAdd.setOnClickListener {
             val extras = MediaPickerExtras.Builder()
-                .senderName(mediaExtras.chatroomName ?: "Chatroom")
+                .senderName("Chatroom")
                 .mediaTypes(listOf(AUDIO))
                 .build()
             val intent = MediaPickerActivity.getIntent(

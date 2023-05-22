@@ -36,7 +36,7 @@ import java.util.*
  */
 
 @SuppressLint("InlinedApi")
-internal class MediaRepository {
+class MediaRepository {
     companion object {
         private const val CAMERA = "Camera"
         private const val ALL_MEDIA_BUCKET_ID = "com.collabmates.ALL_MEDIA"

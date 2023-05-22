@@ -3,21 +3,24 @@ package com.likeminds.customgallery.media.view
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.likeminds.customgallery.CustomGallery
 import com.likeminds.customgallery.R
 import com.likeminds.customgallery.databinding.FragmentMediaPickerItemBinding
-import com.likeminds.customgallery.media.model.MEDIA_RESULT_PICKED
-import com.likeminds.customgallery.media.model.MediaPickerItemExtras
-import com.likeminds.customgallery.media.model.MediaPickerResult
-import com.likeminds.customgallery.media.model.MediaViewData
+import com.likeminds.customgallery.media.model.*
+import com.likeminds.customgallery.media.util.MediaUtils
+import com.likeminds.customgallery.media.view.MediaActivity.Companion.BUNDLE_MEDIA_EXTRAS
 import com.likeminds.customgallery.media.view.adapter.MediaPickerAdapter
 import com.likeminds.customgallery.media.view.adapter.MediaPickerAdapterListener
 import com.likeminds.customgallery.media.viewmodel.MediaViewModel
+import com.likeminds.customgallery.utils.AndroidUtil
 import com.likeminds.customgallery.utils.actionmode.ActionModeCallback
 import com.likeminds.customgallery.utils.actionmode.ActionModeListener
 import com.likeminds.customgallery.utils.customview.BaseAppCompatActivity
@@ -54,7 +57,7 @@ internal class MediaPickerItemFragment :
         }
     }
 
-    override fun getViewModelClass(): Class<MediaViewModel>? {
+    override fun getViewModelClass(): Class<MediaViewModel> {
         return MediaViewModel::class.java
     }
 
@@ -229,15 +232,73 @@ internal class MediaPickerItemFragment :
             .allowMultipleSelect(mediaPickerItemExtras.allowMultipleSelect)
             .medias(medias)
             .build()
-
-        val intent = Intent().apply {
-            putExtras(Bundle().apply {
-                putParcelable(
-                    MediaPickerActivity.ARG_MEDIA_PICKER_RESULT, extra
-                )
-            })
+        val mediaUris =
+            MediaUtils.convertMediaViewDataToSingleUriData(requireContext(), extra.medias)
+        if (mediaUris.isNotEmpty() && mediaPickerItemExtras.isEditingAllowed) {
+            showPickImagesListScreen(mediaUris)
+        } else {
+            val customGalleryResult = CustomGalleryResult.Builder()
+                .medias(mediaUris)
+                .text(mediaPickerItemExtras.text)
+                .build()
+            val intent = Intent().apply {
+                putExtras(Bundle().apply {
+                    putParcelable(CustomGallery.ARG_CUSTOM_GALLERY_RESULT, customGalleryResult)
+                })
+            }
+            requireActivity().setResult(Activity.RESULT_OK, intent)
+            requireActivity().finish()
         }
-        requireActivity().setResult(Activity.RESULT_OK, intent)
-        requireActivity().finish()
+    }
+
+    private var imageVideoSendLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                Log.d("PUI", "111: ")
+                val data = result.data?.extras?.getParcelable<MediaExtras>(BUNDLE_MEDIA_EXTRAS)
+                    ?: return@registerForActivityResult
+                val customGalleryResult = CustomGalleryResult.Builder()
+                    .medias(data.mediaUris?.toList() ?: listOf())
+                    .text(data.text)
+                    .build()
+                val intent = Intent().apply {
+                    putExtras(Bundle().apply {
+                        putParcelable(CustomGallery.ARG_CUSTOM_GALLERY_RESULT, customGalleryResult)
+                    })
+                }
+                requireActivity().setResult(Activity.RESULT_OK, intent)
+                requireActivity().finish()
+            }
+        }
+
+    private fun showPickImagesListScreen(
+        medias: List<SingleUriData>,
+        saveInCache: Boolean = false,
+        isExternallyShared: Boolean = false
+    ) {
+        val attachments = if (saveInCache) {
+            AndroidUtil.moveAttachmentToCache(requireContext(), *medias.toTypedArray())
+        } else {
+            medias
+        }
+        if (attachments.isNotEmpty()) {
+            val arrayList = ArrayList<SingleUriData>()
+            arrayList.addAll(attachments)
+
+            Log.d(
+                "PUI", "" +
+                        "showPickImagesListScreen: ${mediaPickerItemExtras.text}"
+            )
+            val mediaExtras = MediaExtras.Builder()
+                .mediaScreenType(MEDIA_EDIT_SCREEN)
+                .mediaUris(arrayList)
+                .text(mediaPickerItemExtras.text)
+                .isExternallyShared(isExternallyShared)
+                .build()
+
+            val intent =
+                MediaActivity.getIntent(requireContext(), mediaExtras, activity?.intent?.clipData)
+            imageVideoSendLauncher.launch(intent)
+        }
     }
 }

@@ -86,7 +86,7 @@ internal class DocumentSendFragment :
 
         binding.buttonAdd.setOnClickListener {
             val extras = MediaPickerExtras.Builder()
-                .senderName(mediaExtras.chatroomName ?: "Chatroom")
+                .senderName("Chatroom")
                 .mediaTypes(listOf(PDF))
                 .build()
 
@@ -100,6 +100,11 @@ internal class DocumentSendFragment :
 
         binding.buttonDelete.setOnClickListener {
             deleteCurrentMedia()
+        }
+
+        binding.etConversation.apply {
+            setText(mediaExtras.text)
+            setSelection(length())
         }
     }
 

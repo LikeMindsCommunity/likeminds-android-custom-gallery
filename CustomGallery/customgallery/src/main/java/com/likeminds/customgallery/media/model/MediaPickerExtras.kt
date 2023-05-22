@@ -5,9 +5,11 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal class MediaPickerExtras private constructor(
-    var senderName: String?,
+    val senderName: String?,
     @MediaType var mediaTypes: List<String>,
-    var allowMultipleSelect: Boolean,
+    val allowMultipleSelect: Boolean,
+    val isEditingAllowed: Boolean,
+    val text: String?
 ) : Parcelable {
 
     internal class Builder {
@@ -15,19 +17,34 @@ internal class MediaPickerExtras private constructor(
 
         @MediaType
         private var mediaTypes: List<String> = emptyList()
-        var allowMultipleSelect: Boolean = true
+        private var allowMultipleSelect: Boolean = true
+        private var isEditingAllowed: Boolean = false
+        private var text: String? = null
 
         fun senderName(senderName: String?) = apply { this.senderName = senderName }
         fun mediaTypes(@MediaType mediaTypes: List<String>) = apply { this.mediaTypes = mediaTypes }
         fun allowMultipleSelect(allowMultipleSelect: Boolean) =
             apply { this.allowMultipleSelect = allowMultipleSelect }
 
-        fun build() = MediaPickerExtras(senderName, mediaTypes, allowMultipleSelect)
+        fun isEditingAllowed(isEditingAllowed: Boolean) =
+            apply { this.isEditingAllowed = isEditingAllowed }
+
+        fun text(text: String?) = apply { this.text = text }
+
+        fun build() = MediaPickerExtras(
+            senderName,
+            mediaTypes,
+            allowMultipleSelect,
+            isEditingAllowed,
+            text
+        )
     }
 
     fun toBuilder(): Builder {
         return Builder().senderName(senderName)
             .allowMultipleSelect(allowMultipleSelect)
             .mediaTypes(mediaTypes)
+            .isEditingAllowed(isEditingAllowed)
+            .text(text)
     }
 }

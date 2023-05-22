@@ -7,10 +7,9 @@ const val IMAGE = "image"
 const val VIDEO = "video"
 const val AUDIO = "audio"
 const val PDF = "pdf"
-const val VOICE_NOTE = "voice_note"
 
 @StringDef(
-    IMAGE, VIDEO, PDF, AUDIO, VOICE_NOTE
+    IMAGE, VIDEO, PDF, AUDIO
 )
 
 @Retention(AnnotationRetention.SOURCE)
@@ -44,8 +43,7 @@ annotation class MediaType {
             return type == IMAGE ||
                     type == VIDEO ||
                     type == AUDIO ||
-                    type == PDF ||
-                    type == VOICE_NOTE
+                    type == PDF
         }
 
         fun isImage(mediaType: String?): Boolean {
@@ -94,7 +92,6 @@ annotation class MediaType {
                 VIDEO -> "VID_"
                 PDF -> "DOC_"
                 AUDIO -> "AUD_"
-                VOICE_NOTE -> "VOC_"
                 else -> "MEDIA_"
             }
             if (isThumbnail) {

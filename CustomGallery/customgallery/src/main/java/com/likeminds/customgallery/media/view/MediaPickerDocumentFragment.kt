@@ -4,19 +4,26 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
+import com.likeminds.customgallery.CustomGallery.ARG_CUSTOM_GALLERY_RESULT
 import com.likeminds.customgallery.R
 import com.likeminds.customgallery.databinding.FragmentMediaPickerDocumentBinding
 import com.likeminds.customgallery.media.model.*
+import com.likeminds.customgallery.media.util.MediaUtils
+import com.likeminds.customgallery.media.view.MediaActivity.Companion.BUNDLE_MEDIA_EXTRAS
 import com.likeminds.customgallery.media.view.adapter.MediaPickerAdapter
 import com.likeminds.customgallery.media.view.adapter.MediaPickerAdapterListener
 import com.likeminds.customgallery.media.viewmodel.MediaViewModel
+import com.likeminds.customgallery.utils.AndroidUtil
 import com.likeminds.customgallery.utils.customview.BaseFragment
 import com.likeminds.customgallery.utils.search.CustomSearchBar
 
@@ -33,6 +40,13 @@ internal class MediaPickerDocumentFragment() :
 
     private var currentSort = SORT_BY_NAME
 
+    private var browseDocumentLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                onPdfPicked(result.data)
+            }
+        }
+
     companion object {
         const val TAG = "MediaPickerDocument"
         private const val BUNDLE_MEDIA_PICKER_DOC = "bundle of media picker doc"
@@ -47,7 +61,7 @@ internal class MediaPickerDocumentFragment() :
         }
     }
 
-    override fun getViewModelClass(): Class<MediaViewModel>? {
+    override fun getViewModelClass(): Class<MediaViewModel> {
         return MediaViewModel::class.java
     }
 
@@ -126,23 +140,70 @@ internal class MediaPickerDocumentFragment() :
     }
 
     private fun sendSelectedMedias(medias: List<MediaViewData>) {
-        val extra = MediaPickerResult.Builder()
-            .isResultOk(true)
-            .mediaPickerResultType(MEDIA_RESULT_PICKED)
-            .mediaTypes(mediaPickerExtras.mediaTypes)
-            .allowMultipleSelect(mediaPickerExtras.allowMultipleSelect)
-            .medias(medias)
-            .build()
-
-        val intent = Intent().apply {
-            putExtras(Bundle().apply {
-                putParcelable(
-                    MediaPickerActivity.ARG_MEDIA_PICKER_RESULT, extra
-                )
-            })
+        val mediaUris =
+            MediaUtils.convertMediaViewDataToSingleUriData(requireContext(), medias)
+        if (mediaUris.isNotEmpty() && mediaPickerExtras.isEditingAllowed) {
+            showPickDocumentsListScreen(*mediaUris.toTypedArray())
+        } else {
+            val customGalleryResult = CustomGalleryResult.Builder()
+                .medias(mediaUris)
+                .text(mediaPickerExtras.text)
+                .build()
+            val intent = Intent().apply {
+                putExtras(Bundle().apply {
+                    putParcelable(ARG_CUSTOM_GALLERY_RESULT, customGalleryResult)
+                })
+            }
+            requireActivity().setResult(Activity.RESULT_OK, intent)
+            requireActivity().finish()
         }
-        requireActivity().setResult(Activity.RESULT_OK, intent)
-        requireActivity().finish()
+    }
+
+    private var documentSendLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data = result.data?.extras?.getParcelable<MediaExtras>(BUNDLE_MEDIA_EXTRAS)
+                    ?: return@registerForActivityResult
+                val customGalleryResult = CustomGalleryResult.Builder()
+                    .medias(data.mediaUris?.toList() ?: listOf())
+                    .text(data.text)
+                    .build()
+                val intent = Intent().apply {
+                    putExtras(Bundle().apply {
+                        putParcelable(ARG_CUSTOM_GALLERY_RESULT, customGalleryResult)
+                    })
+                }
+                requireActivity().setResult(Activity.RESULT_OK, intent)
+                requireActivity().finish()
+            } else if (result?.resultCode == Activity.RESULT_FIRST_USER) {
+                requireActivity().finish()
+            }
+        }
+
+    private fun showPickDocumentsListScreen(
+        vararg mediaUris: SingleUriData,
+        saveInCache: Boolean = false,
+        isExternallyShared: Boolean = false,
+    ) {
+        val attachments = if (saveInCache) {
+            AndroidUtil.moveAttachmentToCache(requireContext(), *mediaUris)
+        } else {
+            mediaUris.asList()
+        }
+
+        val arrayList = ArrayList<SingleUriData>()
+        arrayList.addAll(attachments)
+
+        val mediaExtras = MediaExtras.Builder()
+            .mediaScreenType(MEDIA_DOCUMENT_SEND_SCREEN)
+            .mediaUris(arrayList)
+            .text(mediaPickerExtras.text)
+            .isExternallyShared(isExternallyShared)
+            .build()
+        if (attachments.isNotEmpty()) {
+            val intent = MediaActivity.getIntent(requireContext(), mediaExtras)
+            documentSendLauncher.launch(intent)
+        }
     }
 
     private fun updateSelectedCount() {
@@ -186,21 +247,10 @@ internal class MediaPickerDocumentFragment() :
     }
 
     override fun browseDocumentClicked() {
-        val extra = MediaPickerResult.Builder()
-            .isResultOk(true)
-            .mediaPickerResultType(MEDIA_RESULT_BROWSE)
-            .mediaTypes(mediaPickerExtras.mediaTypes)
-            .allowMultipleSelect(mediaPickerExtras.allowMultipleSelect)
-            .build()
-        val intent = Intent().apply {
-            putExtras(Bundle().apply {
-                putParcelable(
-                    MediaPickerActivity.ARG_MEDIA_PICKER_RESULT, extra
-                )
-            })
-        }
-        requireActivity().setResult(Activity.RESULT_OK, intent)
-        requireActivity().finish()
+        val intent = AndroidUtil.getExternalDocumentPickerIntent(
+            allowMultipleSelect = mediaPickerExtras.allowMultipleSelect
+        )
+        browseDocumentLauncher.launch(intent)
     }
 
     override fun isMultiSelectionAllowed(): Boolean {
@@ -238,6 +288,9 @@ internal class MediaPickerDocumentFragment() :
     }
 
     private fun initializeSearchView() {
+        val searchBar = binding.searchBar
+        searchBar.initialize(lifecycleScope)
+
         binding.searchBar.setSearchViewListener(
             object : CustomSearchBar.SearchViewListener {
                 override fun onSearchViewClosed() {
@@ -265,6 +318,31 @@ internal class MediaPickerDocumentFragment() :
         binding.searchBar.visibility = View.VISIBLE
         binding.searchBar.post {
             binding.searchBar.openSearch()
+        }
+    }
+
+    private fun onPdfPicked(data: Intent?) {
+        val uris = MediaUtils.getExternalIntentPickerUris(data)
+        viewModel.fetchUriDetails(requireContext(), uris) {
+            val mediaUris = MediaUtils.convertMediaViewDataToSingleUriData(
+                requireContext(), it
+            )
+            if (mediaUris.isNotEmpty() && mediaPickerExtras.isEditingAllowed) {
+                Log.d("PUI", "onPdfPicked: ")
+                showPickDocumentsListScreen(*mediaUris.toTypedArray(), saveInCache = true)
+            } else {
+                val customGalleryResult = CustomGalleryResult.Builder()
+                    .medias(mediaUris)
+                    .text(mediaPickerExtras.text)
+                    .build()
+                val intent = Intent().apply {
+                    putExtras(Bundle().apply {
+                        putParcelable(ARG_CUSTOM_GALLERY_RESULT, customGalleryResult)
+                    })
+                }
+                requireActivity().setResult(Activity.RESULT_OK, intent)
+                requireActivity().finish()
+            }
         }
     }
 
