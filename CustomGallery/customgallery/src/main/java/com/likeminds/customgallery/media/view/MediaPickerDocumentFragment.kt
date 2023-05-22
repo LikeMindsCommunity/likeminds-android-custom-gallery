@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -328,7 +327,6 @@ internal class MediaPickerDocumentFragment() :
                 requireContext(), it
             )
             if (mediaUris.isNotEmpty() && mediaPickerExtras.isEditingAllowed) {
-                Log.d("PUI", "onPdfPicked: ")
                 showPickDocumentsListScreen(*mediaUris.toTypedArray(), saveInCache = true)
             } else {
                 val customGalleryResult = CustomGalleryResult.Builder()

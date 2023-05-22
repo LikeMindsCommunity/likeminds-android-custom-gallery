@@ -12,6 +12,7 @@ import com.likeminds.customgallery.R
 import com.likeminds.customgallery.media.MediaRepository
 import com.likeminds.customgallery.media.model.*
 import com.likeminds.customgallery.media.util.MediaUtils
+import com.likeminds.customgallery.media.view.MediaActivity.Companion.BUNDLE_MEDIA_EXTRAS
 import com.likeminds.customgallery.utils.AndroidUtil
 import com.likeminds.customgallery.utils.ViewUtils.currentFragment
 import com.likeminds.customgallery.utils.customview.BaseAppCompatActivity
@@ -61,15 +62,25 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
                     val mediaUris = MediaUtils.convertMediaViewDataToSingleUriData(
                         this, it
                     )
-                    if (mediaUris.isNotEmpty()) {
-                        showPickDocumentsListScreen(
-                            *mediaUris.toTypedArray(),
-                            saveInCache = true
-                        )
+                    if (mediaUris.isNotEmpty() && mediaPickerExtras.isEditingAllowed) {
+                        showPickDocumentsListScreen(mediaUris)
+                    } else {
+                        val customGalleryResult = CustomGalleryResult.Builder()
+                            .medias(mediaUris)
+                            .text(mediaPickerExtras.text)
+                            .build()
+                        val intent = Intent().apply {
+                            putExtras(Bundle().apply {
+                                putParcelable(
+                                    CustomGallery.ARG_CUSTOM_GALLERY_RESULT,
+                                    customGalleryResult
+                                )
+                            })
+                        }
+                        setResult(Activity.RESULT_OK, intent)
+                        finish()
                     }
                 }
-                setResult(Activity.RESULT_OK, intent)
-                finish()
             }
         }
 
@@ -77,7 +88,7 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val data =
-                    result.data?.extras?.getParcelable<MediaExtras>(MediaActivity.BUNDLE_MEDIA_EXTRAS)
+                    result.data?.extras?.getParcelable<MediaExtras>(BUNDLE_MEDIA_EXTRAS)
                         ?: return@registerForActivityResult
                 val customGalleryResult = CustomGalleryResult.Builder()
                     .medias(data.mediaUris?.toList() ?: listOf())
@@ -177,14 +188,14 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
     }
 
     private fun showPickDocumentsListScreen(
-        vararg mediaUris: SingleUriData,
+        medias: List<SingleUriData>,
         saveInCache: Boolean = false,
         isExternallyShared: Boolean = false,
     ) {
         val attachments = if (saveInCache) {
-            AndroidUtil.moveAttachmentToCache(this, *mediaUris)
+            AndroidUtil.moveAttachmentToCache(this, *medias.toTypedArray())
         } else {
-            mediaUris.asList()
+            medias
         }
 
         val arrayList = ArrayList<SingleUriData>()
@@ -196,6 +207,7 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
             .text(mediaPickerExtras.text)
             .isExternallyShared(isExternallyShared)
             .build()
+
         if (attachments.isNotEmpty()) {
             val intent = MediaActivity.getIntent(this, mediaExtras)
             documentSendLauncher.launch(intent)

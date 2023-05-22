@@ -1,34 +1,30 @@
 package com.likeminds.customgallery
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import com.likeminds.customgallery.media.model.*
+import com.likeminds.customgallery.media.model.AUDIO
+import com.likeminds.customgallery.media.model.CustomGalleryConfig
+import com.likeminds.customgallery.media.model.MediaPickerExtras
+import com.likeminds.customgallery.media.model.PDF
 import com.likeminds.customgallery.media.view.MediaPickerActivity
 
 object CustomGallery {
     const val ARG_CUSTOM_GALLERY_RESULT = "custom_gallery_result"
 
     fun start(
+        launcher: ActivityResultLauncher<Intent>,
         context: Context,
         customGalleryConfig: CustomGalleryConfig
     ) {
-        if (context is AppCompatActivity) {
-            initiateMediaPicker(context, customGalleryConfig)
-        } else {
-            throw IllegalArgumentException("Invalid context!")
-        }
+        initiateMediaPicker(launcher, context, customGalleryConfig)
     }
 
     private fun initiateMediaPicker(
-        context: AppCompatActivity,
+        launcher: ActivityResultLauncher<Intent>,
+        context: Context,
         customGalleryConfig: CustomGalleryConfig
     ) {
-        Log.d("PUI", "initiateMediaPicker: ${customGalleryConfig.inputText}")
         val extras = MediaPickerExtras.Builder()
             .mediaTypes(customGalleryConfig.mediaTypes)
             .allowMultipleSelect(customGalleryConfig.allowMultipleSelect)
@@ -38,33 +34,16 @@ object CustomGallery {
 
         when (customGalleryConfig.mediaTypes.first()) {
             PDF -> {
-                val documentLauncher = getMediaPickerLauncher(context)
                 val intent = MediaPickerActivity.getIntent(context, extras)
-                documentLauncher.launch(intent)
+                launcher.launch(intent)
             }
             AUDIO -> {
-                val audioLauncher = getMediaPickerLauncher(context)
                 val intent = MediaPickerActivity.getIntent(context, extras)
-                audioLauncher.launch(intent)
+                launcher.launch(intent)
             }
             else -> {
-                val galleryLauncher = getMediaPickerLauncher(context)
                 val intent = MediaPickerActivity.getIntent(context, extras)
-                galleryLauncher.launch(intent)
-            }
-        }
-    }
-
-    private fun getMediaPickerLauncher(context: AppCompatActivity): ActivityResultLauncher<Intent> {
-        Log.d("PUI", "getMediaPickerLauncher: called")
-        return context.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                Log.d("PUI", "222: ${result.data.toString()}")
-                val data = result.data?.extras?.getParcelable<CustomGalleryResult>(
-                    ARG_CUSTOM_GALLERY_RESULT
-                )
-                    ?: return@registerForActivityResult
-                Log.d("PUI", "getMediaPickerLauncher: ${data.medias.first().mediaName}")
+                launcher.launch(intent)
             }
         }
     }

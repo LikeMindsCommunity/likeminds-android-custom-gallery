@@ -10,7 +10,6 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.view.isVisible
@@ -223,8 +222,6 @@ internal class MediaEditFragment :
         binding.buttonDelete.setOnClickListener {
             deleteCurrentMedia()
         }
-
-        Log.d("PUI", "etConversation -media: ${mediaExtras.text}")
 
         binding.etConversation.apply {
             setText(mediaExtras.text)

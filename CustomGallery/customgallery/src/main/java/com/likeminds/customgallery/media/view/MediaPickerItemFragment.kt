@@ -3,7 +3,6 @@ package com.likeminds.customgallery.media.view
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -254,7 +253,6 @@ internal class MediaPickerItemFragment :
     private var imageVideoSendLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                Log.d("PUI", "111: ")
                 val data = result.data?.extras?.getParcelable<MediaExtras>(BUNDLE_MEDIA_EXTRAS)
                     ?: return@registerForActivityResult
                 val customGalleryResult = CustomGalleryResult.Builder()
@@ -284,11 +282,6 @@ internal class MediaPickerItemFragment :
         if (attachments.isNotEmpty()) {
             val arrayList = ArrayList<SingleUriData>()
             arrayList.addAll(attachments)
-
-            Log.d(
-                "PUI", "" +
-                        "showPickImagesListScreen: ${mediaPickerItemExtras.text}"
-            )
             val mediaExtras = MediaExtras.Builder()
                 .mediaScreenType(MEDIA_EDIT_SCREEN)
                 .mediaUris(arrayList)

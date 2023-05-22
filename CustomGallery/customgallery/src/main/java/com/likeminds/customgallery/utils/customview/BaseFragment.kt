@@ -1,7 +1,6 @@
 package com.likeminds.customgallery.utils.customview
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -98,7 +97,6 @@ abstract class BaseFragment<B : ViewBinding, VM : ViewModel> : Fragment() {
         }
         val mediaRepository = MediaRepository()
         val viewModelFactory = MediaViewModelFactory(mediaRepository)
-        Log.d("PUI", "init: ${getViewModelClass()}")
         viewModel = ViewModelProvider(this, viewModelFactory)[getViewModelClass()!!]
     }
 }
