@@ -31,11 +31,13 @@ users.
 
 To start using the Android Custom Gallery Library in your project, follow these steps:
 
-- Clone this repository in you project.
+- Clone this repository in your project.
 
 - Initialize the library by calling of `CustomGallery.start()`
 
 - The initiation requires an ActivityLauncher, context and an object of `CustomGalleryConfig`.
+
+- `launcher` is the `ActivityResultLauncher` required to return the result of media picker.
 
 ```kotlin
 CustomGallery.start(
