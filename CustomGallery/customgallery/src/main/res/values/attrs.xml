@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ColorSeekBar">
+        <attr name="colorSeeds" format="reference" />
+        <attr name="cornerRadius" format="dimension" />
+        <attr name="barHeight" format="dimension" />
+        <attr name="thumbBorderColor" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="AnimatedRecyclerView">
+        <attr name="layoutAnimation" format="reference" />
+        <attr name="animationDuration" format="integer" />
+        <attr name="layoutManagerOrientation" format="integer">
+            <enum name="horizontal" value="0" />
+            <enum name="vertical" value="1" />
+        </attr>
+        <attr name="layoutManagerReverse" format="boolean" />
+        <attr name="layoutManagerType" format="integer">
+            <enum name="linear" value="0" />
+            <enum name="grid" value="1" />
+        </attr>
+        <attr name="gridLayoutManagerColumns" format="integer" />
+    </declare-styleable>
+</resources>
