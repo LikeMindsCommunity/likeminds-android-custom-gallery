@@ -10,6 +10,12 @@ import com.likeminds.customgallery.media.view.MediaPickerActivity
 object CustomGallery {
     const val ARG_CUSTOM_GALLERY_RESULT = "custom_gallery_result"
 
+    /**
+     * initiates the media picker and starts
+     * @param launcher: launcher to return result of media picker
+     * @param context: required context
+     * @param customGalleryConfig: configuration required to start media picker
+     */
     fun start(
         launcher: ActivityResultLauncher<Intent>,
         context: Context,
@@ -18,6 +24,7 @@ object CustomGallery {
         initiateMediaPicker(launcher, context, customGalleryConfig)
     }
 
+    // initiates the media picker as per the passed configurations
     private fun initiateMediaPicker(
         launcher: ActivityResultLauncher<Intent>,
         context: Context,
