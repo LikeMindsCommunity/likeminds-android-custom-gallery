@@ -1,0 +1,27 @@
+dependencies {
+    //core android
+    implementation deps.android_core.core
+    implementation deps.android_core.appcompat
+    implementation deps.ktx.fragment
+
+    //ui
+    implementation deps.ui.material_design
+    implementation deps.ui.constraint_layout
+    implementation deps.ui.recycler_view
+
+    //lifecycle and viewmodel
+    implementation deps.lifecycle.viewmodel
+    implementation deps.lifecycle.livedata
+    kapt deps.lifecycle.annotation
+
+    //navigation
+    implementation deps.navigation.main
+    implementation deps.navigation.ui
+
+    //testing
+    testImplementation deps.testing.junit
+    androidTestImplementation deps.testing.android_junit
+    androidTestImplementation deps.testing.espresso
+
+    implementation project(":customgallery")
+}

@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Custom Gallery Sample App</string>
+    <string name="attach_files">Attach Files</string>
+    <string name="add_audio">Add Audio</string>
+    <string name="add_video">Add Video</string>
+    <string name="add_photo">Add Photo</string>
+    <string name="gallery">Gallery</string>
+</resources>
