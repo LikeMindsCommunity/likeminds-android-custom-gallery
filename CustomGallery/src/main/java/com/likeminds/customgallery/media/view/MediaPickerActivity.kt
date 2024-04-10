@@ -16,9 +16,7 @@ import com.likeminds.customgallery.media.view.MediaActivity.Companion.BUNDLE_MED
 import com.likeminds.customgallery.utils.AndroidUtil
 import com.likeminds.customgallery.utils.ViewUtils.currentFragment
 import com.likeminds.customgallery.utils.customview.BaseAppCompatActivity
-import com.likeminds.customgallery.utils.permissions.Permission
-import com.likeminds.customgallery.utils.permissions.PermissionDeniedCallback
-import com.likeminds.customgallery.utils.permissions.PermissionManager
+import com.likeminds.customgallery.utils.permissions.*
 
 internal class MediaPickerActivity : BaseAppCompatActivity() {
 
@@ -76,6 +74,7 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
                 val data =
                     result.data?.extras?.getParcelable<MediaExtras>(BUNDLE_MEDIA_EXTRAS)
                         ?: return@registerForActivityResult
+
                 setResultAndFinish(
                     data.mediaUris?.toList() ?: listOf(),
                     data.text
@@ -145,12 +144,15 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
                 MediaType.isImageOrVideo(mediaPickerExtras.mediaTypes) -> {
                     navGraph.setStartDestination(R.id.mediaPickerFolderFragment)
                 }
+
                 MediaType.isPDF(mediaPickerExtras.mediaTypes) -> {
                     navGraph.setStartDestination(R.id.mediaPickerDocumentFragment)
                 }
+
                 MediaType.isAudio(mediaPickerExtras.mediaTypes) -> {
                     navGraph.setStartDestination(R.id.mediaPickerAudioFragment)
                 }
+
                 else -> {
                     finish()
                 }
@@ -174,7 +176,7 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
                 allowMultipleSelect = mediaPickerExtras.allowMultipleSelect
             )
             browserMediaLauncher.launch(intent)
-            finish()
+//            finish()
             return true
         }
         return false
@@ -219,15 +221,19 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
             is MediaPickerFolderFragment -> {
                 super.onBackPressed()
             }
+
             is MediaPickerItemFragment -> {
                 fragment.onBackPressedFromFragment()
             }
+
             is MediaPickerDocumentFragment -> {
                 if (fragment.onBackPressedFromFragment()) super.onBackPressed()
             }
+
             is MediaPickerAudioFragment -> {
                 if (fragment.onBackPress()) super.onBackPressed()
             }
+
             else -> {
                 super.onBackPressed()
             }

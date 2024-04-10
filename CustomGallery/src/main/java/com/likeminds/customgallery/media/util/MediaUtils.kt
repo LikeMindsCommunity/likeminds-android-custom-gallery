@@ -19,7 +19,7 @@ import com.likeminds.customgallery.utils.file.util.MemoryUnitFormat
 import com.likeminds.customgallery.utils.file.util.isLargeFile
 import java.io.InputStream
 
-internal object MediaUtils {
+object MediaUtils {
 
     private const val TAG = "MediaUtils"
 

@@ -19,13 +19,6 @@
             android:paddingVertical="10dp"
             app:layout_constraintBottom_toBottomOf="parent">
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_create_gallery"
-                app:tint="@color/black"
-                tools:ignore="ContentDescription" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -94,7 +87,6 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_attach_files"
                 tools:ignore="ContentDescription" />
 
             <TextView
@@ -129,7 +121,6 @@
                 android:id="@+id/iv_add_video"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_add_video"
                 tools:ignore="ContentDescription" />
 
             <TextView
@@ -164,7 +155,6 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_add_image"
                 tools:ignore="ContentDescription" />
 
             <TextView

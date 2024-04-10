@@ -120,6 +120,34 @@ object FileUtil {
         return true
     }
 
+    fun compressFile(applicationContext: Context, filePath: String): File? {
+        try {
+            val oldExifOrientation =
+                ExifInterface(filePath).getAttribute(ExifInterface.TAG_ORIENTATION)
+            val bitmap = BitmapFactory.decodeFile(filePath) ?: return null
+            val imagesFolder = File(applicationContext.cacheDir, "images")
+            imagesFolder.mkdirs()
+            val file = File(imagesFolder, "${System.currentTimeMillis()}.png")
+            val stream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream)
+            stream.flush()
+            stream.close()
+            // Update the old image orientation attributes to the compressed one
+            if (oldExifOrientation != null) {
+                val newExif = ExifInterface(file.absolutePath)
+                newExif.setAttribute(ExifInterface.TAG_ORIENTATION, oldExifOrientation)
+                newExif.saveAttributes()
+            }
+            return file
+        } catch (e: IOException) {
+            Log.e(
+                TAG,
+                "IOException while trying to compress file: " + e.localizedMessage
+            )
+            return null
+        }
+    }
+
     @JvmStatic
     fun getUriFromBitmapWithRandomName(
         context: Context,
@@ -215,6 +243,21 @@ object FileUtil {
             }
         }
         return bitmap
+    }
+
+    fun getImageDimensions(context: Context, uri: Uri): Pair<Int, Int> {
+        return try {
+            val options = BitmapFactory.Options()
+            options.inJustDecodeBounds = true
+            val parcelFileDescriptor = context.contentResolver.openFileDescriptor(uri, "r")!!
+            val fileDescriptor = parcelFileDescriptor.fileDescriptor
+            BitmapFactory.decodeFileDescriptor(fileDescriptor, null, options)
+            parcelFileDescriptor.close()
+            Pair(options.outWidth, options.outHeight)
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+            Pair(0, 0)
+        }
     }
 
     fun getVideoThumbnailUri(context: Context, videoUri: Uri?): Uri? {
@@ -430,6 +473,12 @@ object FileUtil {
             ".mp4", /* suffix */
             storageDir /* directory */
         )
+    }
+
+    fun getFileExtensionFromFileName(
+        fileName: String?
+    ): String? {
+        return fileName?.substringAfterLast(".", "")
     }
 }
 

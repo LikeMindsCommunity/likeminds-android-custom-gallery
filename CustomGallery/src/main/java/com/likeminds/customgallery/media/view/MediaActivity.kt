@@ -16,8 +16,6 @@ internal class MediaActivity : BaseAppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_media)
-        Log.d("PUI", "onCreate: called")
-
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host) as? NavHostFragment ?: return
         val graphInflater = navHostFragment.navController.navInflater

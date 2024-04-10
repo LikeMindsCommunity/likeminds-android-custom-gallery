@@ -3,6 +3,7 @@ package com.likeminds.customgallery
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import com.likeminds.customgallery.media.model.*
 import com.likeminds.customgallery.media.view.MediaPickerActivity
@@ -60,6 +61,7 @@ object CustomGallery {
         text: String?
     ): Intent {
         val customGalleryResult = CustomGalleryResult.Builder()
+            .mediaTypes(mediaTypes)
             .medias(mediaUris)
             .text(text)
             .build()

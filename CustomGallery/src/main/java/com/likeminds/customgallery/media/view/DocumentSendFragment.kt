@@ -3,6 +3,7 @@ package com.likeminds.customgallery.media.view
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -176,7 +177,7 @@ internal class DocumentSendFragment :
         if (singleUriData.fileType == PDF) {
             val name = singleUriData.mediaName
             val pageCount = singleUriData.pdfPageCount ?: 0
-            val size = singleUriData.size ?: 0
+            val size = singleUriData.size
             val thumbnail = singleUriData.thumbnailUri
 
             binding.textViewDocumentName.text = name
