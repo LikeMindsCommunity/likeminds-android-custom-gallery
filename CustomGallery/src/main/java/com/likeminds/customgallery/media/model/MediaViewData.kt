@@ -21,7 +21,8 @@ class MediaViewData private constructor(
     val filteredKeywords: List<String>?,
     val pdfPageCount: Int?,
     val playOrPause: String?,
-    val audioProgress: Int?
+    val audioProgress: Int?,
+    val thumbnailUri: Uri?
 ) : Parcelable, BaseViewType {
     override val viewType: Int
         get() = dynamicViewType ?: ITEM_MEDIA_PICKER_SINGLE
@@ -41,6 +42,7 @@ class MediaViewData private constructor(
         private var pdfPageCount: Int? = null
         private var playOrPause: String? = null
         private var audioProgress: Int? = null
+        private var thumbnailUri: Uri? = null
 
         fun uri(uri: Uri) = apply { this.uri = uri }
         fun mimeType(mimeType: String?) = apply { this.mimeType = mimeType }
@@ -62,6 +64,7 @@ class MediaViewData private constructor(
         fun pdfPageCount(pdfPageCount: Int?) = apply { this.pdfPageCount = pdfPageCount }
         fun playOrPause(playOrPause: String?) = apply { this.playOrPause = playOrPause }
         fun audioProgress(audioProgress: Int?) = apply { this.audioProgress = audioProgress }
+        fun thumbnailUri(thumbnailUri: Uri?) = apply { this.thumbnailUri = thumbnailUri }
 
         fun build() = MediaViewData(
             uri,
@@ -77,7 +80,8 @@ class MediaViewData private constructor(
             filteredKeywords,
             pdfPageCount,
             playOrPause,
-            audioProgress
+            audioProgress,
+            thumbnailUri
         )
     }
 
@@ -96,5 +100,6 @@ class MediaViewData private constructor(
             .pdfPageCount(pdfPageCount)
             .playOrPause(playOrPause)
             .audioProgress(audioProgress)
+            .thumbnailUri(thumbnailUri)
     }
 }

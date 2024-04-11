@@ -528,6 +528,12 @@ class MediaRepository {
                             null
                         }
 
+                    val thumbnailUri = if (MediaType.isPDF(mediaType)) {
+                        MediaUtils.getDocumentPreview(context, contentUri)
+                    } else {
+                        null
+                    }
+
                     if (mediaType != null) {
                         media = MediaViewData.Builder()
                             .uri(contentUri)
@@ -537,6 +543,7 @@ class MediaRepository {
                             .mediaName(mediaName)
                             .duration(duration)
                             .pdfPageCount(getPdfPageCount(context, contentUri, mimetype))
+                            .thumbnailUri(thumbnailUri)
                             .build()
                     }
                 }

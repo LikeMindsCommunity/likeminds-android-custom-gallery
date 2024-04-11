@@ -107,6 +107,7 @@ object MediaUtils {
                             .duration(mediaViewData.duration)
                             .pdfPageCount(mediaViewData.pdfPageCount)
                             .localFilePath(FileUtil.getRealPath(context, mediaViewData.uri).path)
+                            .thumbnailUri(mediaViewData.thumbnailUri)
                             .build()
                     )
                 } else {

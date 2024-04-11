@@ -40,7 +40,6 @@ class SingleUriData private constructor(
         fun duration(duration: Int?) = apply { this.duration = duration }
         fun localFilePath(localFilePath: String?) = apply { this.localFilePath = localFilePath }
 
-
         fun build() = SingleUriData(
             uri,
             fileType,
