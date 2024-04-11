@@ -18,9 +18,10 @@ import com.likeminds.customgallery.utils.permissions.PermissionManager.Companion
 class PermissionDialog(
     private val activity: BaseAppCompatActivity,
     private val task: PermissionTask,
-    private val permission: Permission,
+    private val permission: Permission?,
     private val mode: Mode,
     private val permissionDeniedCallback: PermissionDeniedCallback?,
+    private val permissionExtras: PermissionExtras? = null
 ) : Dialog(activity), View.OnClickListener {
     private val dialogPermissionBinding: DialogPermissionBinding =
         DialogPermissionBinding.inflate(LayoutInflater.from(context))
@@ -28,32 +29,128 @@ class PermissionDialog(
     init {
         setContentView(dialogPermissionBinding.root)
 
-        dialogPermissionBinding.imageViewIcon.setImageDrawable(
-            ContextCompat.getDrawable(
-                activity,
-                permission.dialogImage
-            )
-        )
-        when (mode) {
-            Mode.INIT -> {
-                dialogPermissionBinding.textViewMessage.text = permission.preDialogMessage
-                dialogPermissionBinding.textViewPositiveButton.text =
-                    activity.getString(R.string.permission_continue)
-            }
-            Mode.DENIED -> {
-                dialogPermissionBinding.textViewMessage.text = permission.deniedDialogMessage
-                dialogPermissionBinding.textViewPositiveButton.text =
-                    activity.getString(R.string.settings)
-            }
-        }
-        dialogPermissionBinding.textViewPositiveButton.setOnClickListener(this)
-        dialogPermissionBinding.textViewNegativeButton.setOnClickListener(this)
-        if (permissionDeniedCallback != null) {
-            setOnCancelListener { permissionDeniedCallback.onDeny() }
+        if (permission != null) {
+            existingPermissionsDialog()
+        } else {
+            updatedPermissionsDialog()
         }
     }
 
+    // handles permission dialog as per the existing flow
+    private fun existingPermissionsDialog() {
+        dialogPermissionBinding.apply {
+            if (permission == null) {
+                return@apply
+            }
+
+            imageViewIcon.setImageDrawable(
+                ContextCompat.getDrawable(
+                    activity,
+                    permission.dialogImage
+                )
+            )
+            when (mode) {
+                Mode.INIT -> {
+                    textViewMessage.text = permission.preDialogMessage
+                    textViewPositiveButton.text =
+                        activity.getString(R.string.join_continue)
+                }
+
+                Mode.DENIED -> {
+                    textViewMessage.text = permission.deniedDialogMessage
+                    textViewPositiveButton.text =
+                        activity.getString(R.string.menu_item_settings)
+                }
+            }
+            textViewPositiveButton.setOnClickListener(this@PermissionDialog)
+            textViewNegativeButton.setOnClickListener(this@PermissionDialog)
+            if (permissionDeniedCallback != null) {
+                setOnCancelListener { permissionDeniedCallback.onDeny() }
+            }
+        }
+    }
+
+    // handles permission dialog as per the updated flow with [PermissionExtras]
+    private fun updatedPermissionsDialog() {
+        dialogPermissionBinding.apply {
+            if (permissionExtras == null) {
+                return@apply
+            }
+
+            imageViewIcon.setImageDrawable(
+                ContextCompat.getDrawable(
+                    activity,
+                    permissionExtras.dialogImage
+                )
+            )
+            when (mode) {
+                Mode.INIT -> {
+                    textViewMessage.text = permissionExtras.preDialogMessage
+                    textViewPositiveButton.text =
+                        activity.getString(R.string.join_continue)
+                }
+
+                Mode.DENIED -> {
+                    textViewMessage.text = permissionExtras.deniedDialogMessage
+                    textViewPositiveButton.text =
+                        activity.getString(R.string.menu_item_settings)
+                }
+            }
+            textViewPositiveButton.setOnClickListener {
+                positiveButtonClicked()
+            }
+            textViewNegativeButton.setOnClickListener {
+                negativeButtonClicked()
+            }
+            if (permissionDeniedCallback != null) {
+                setOnCancelListener { permissionDeniedCallback.onDeny() }
+            }
+        }
+    }
+
+    // handles positive button click for the new flow
+    private fun positiveButtonClicked() {
+        if (permissionExtras == null) {
+            return
+        }
+        when (mode) {
+            Mode.INIT ->
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    activity.requestMultiplePermissions(
+                        permissionExtras,
+                        object : PermissionCallback {
+                            override fun onGrant() {
+                                task.doTask()
+                            }
+
+                            override fun onDeny() {
+                                permissionDeniedCallback?.onDeny()
+                            }
+                        })
+                }
+
+            Mode.DENIED -> {
+                val intent = Intent(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.fromParts("package", activity.packageName, null)
+                )
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                activity.startActivityForResult(intent, REQUEST_CODE_SETTINGS_PERMISSION)
+            }
+        }
+        dismiss()
+    }
+
+    // handles negative button click for the new flow
+    private fun negativeButtonClicked() {
+        permissionDeniedCallback?.onCancel()
+        dismiss()
+    }
+
     override fun onClick(v: View) {
+        if (permission == null) {
+            return
+        }
         when (v.id) {
             R.id.textViewPositiveButton -> {
                 when (mode) {

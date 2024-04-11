@@ -112,22 +112,48 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
 
 
     private fun checkStoragePermission() {
-        PermissionManager.performTaskWithPermission(
-            this,
-            { startMediaPickerFragment() },
-            Permission.getStoragePermissionData(),
-            showInitialPopup = true,
-            showDeniedPopup = true,
-            permissionDeniedCallback = object : PermissionDeniedCallback {
-                override fun onDeny() {
-                    onBackPressed()
-                }
-
-                override fun onCancel() {
-                    onBackPressed()
-                }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val mediaTypes = mediaPickerExtras.mediaTypes
+            if (mediaTypes.contains(PDF) || mediaTypes.contains(GIF)) {
+                startMediaPickerFragment()
+                return
             }
-        )
+            val permissionExtras = Permission.getGalleryPermissionExtras(this)
+
+            PermissionManager.performTaskWithPermissionExtras(
+                this,
+                { startMediaPickerFragment() },
+                permissionExtras,
+                showInitialPopup = true,
+                showDeniedPopup = true,
+                permissionDeniedCallback = object : PermissionDeniedCallback {
+                    override fun onDeny() {
+                        onBackPressedDispatcher.onBackPressed()
+                    }
+
+                    override fun onCancel() {
+                        onBackPressedDispatcher.onBackPressed()
+                    }
+                }
+            )
+        } else {
+            PermissionManager.performTaskWithPermission(
+                this,
+                { startMediaPickerFragment() },
+                Permission.getStoragePermissionData(),
+                showInitialPopup = true,
+                showDeniedPopup = true,
+                permissionDeniedCallback = object : PermissionDeniedCallback {
+                    override fun onDeny() {
+                        onBackPressedDispatcher.onBackPressed()
+                    }
+
+                    override fun onCancel() {
+                        onBackPressedDispatcher.onBackPressed()
+                    }
+                }
+            )
+        }
     }
 
     private fun startMediaPickerFragment() {
@@ -176,7 +202,6 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
                 allowMultipleSelect = mediaPickerExtras.allowMultipleSelect
             )
             browserMediaLauncher.launch(intent)
-//            finish()
             return true
         }
         return false

@@ -77,15 +77,6 @@ class MediaRepository {
     }
 
     /**
-     * Retrieves basic details of shared Uri from local storage.
-     */
-    fun getLocalUriDetail(
-        context: Context, contentUri: Uri, callback: (media: MediaViewData?) -> Unit,
-    ) {
-        callback(getUriDetail(context, contentUri))
-    }
-
-    /**
      * Retrieves basic details of list of shared Uris from local storage.
      */
     fun getLocalUrisDetails(
@@ -105,10 +96,12 @@ class MediaRepository {
                 val videoFolders = getFolders(context, Video.Media.EXTERNAL_CONTENT_URI)
                 data = getFoldersMap(imageFolders, videoFolders)
             }
+
             MediaType.isImage(mediaTypes) -> {
                 val imageFolders = getFolders(context, Images.Media.EXTERNAL_CONTENT_URI)
                 data = getFoldersMap(imageFolders, null)
             }
+
             MediaType.isVideo(mediaTypes) -> {
                 val videoFolders = getFolders(context, Video.Media.EXTERNAL_CONTENT_URI)
                 data = getFoldersMap(null, videoFolders)
@@ -265,11 +258,13 @@ class MediaRepository {
                     getMediaInBucket(context, bucketId, Video.Media.EXTERNAL_CONTENT_URI, false)
                 )
             }
+
             MediaType.isImage(mediaTypes) -> {
                 media.addAll(
                     getMediaInBucket(context, bucketId, Images.Media.EXTERNAL_CONTENT_URI, true)
                 )
             }
+
             MediaType.isVideo(mediaTypes) -> {
                 media.addAll(
                     getMediaInBucket(context, bucketId, Video.Media.EXTERNAL_CONTENT_URI, false)
@@ -378,7 +373,8 @@ class MediaRepository {
             MediaStore.Files.FileColumns.MIME_TYPE,
             MediaStore.Files.FileColumns.DATE_MODIFIED,
             MediaStore.Files.FileColumns.SIZE,
-            MediaStore.Files.FileColumns.DISPLAY_NAME
+            MediaStore.Files.FileColumns.DISPLAY_NAME,
+            MediaStore.Files.FileColumns.TITLE
         )
         val selection = MediaStore.Files.FileColumns.MIME_TYPE + "=? AND " + isNotPending
         context.contentResolver.query(contentUri, projection, selection, mimeTypes, sortBy)
@@ -392,8 +388,11 @@ class MediaRepository {
                         cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_MODIFIED))
                     val size =
                         cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE))
-                    val mediaName =
+                    var mediaName =
                         cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME))
+                    if (mediaName == null)
+                        mediaName =
+                            cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.TITLE))
                     if (!size.isLargeFile) {
                         media.add(
                             MediaViewData.Builder()
@@ -505,40 +504,46 @@ class MediaRepository {
     @WorkerThread
     private fun getUriDetail(context: Context, contentUri: Uri): MediaViewData? {
         var media: MediaViewData? = null
-        context.contentResolver.query(contentUri, null, null, null, null).use { cursor ->
-            if (cursor != null && cursor.moveToNext()) {
-                val mimetype =
-                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MIME_TYPE))
-                val size =
-                    cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE))
-                val mediaName =
-                    cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME))
-                val duration =
-                    if (MediaType.isVideo(media?.mediaType)) {
-                        if (!cursor.isNull(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DURATION))) {
-                            cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DURATION)) / 1000
+        try {
+            context.contentResolver.query(contentUri, null, null, null, null).use { cursor ->
+                if (cursor != null && cursor.moveToNext()) {
+                    val mimetype =
+                        cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MIME_TYPE))
+                    val size =
+                        cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE))
+                    val mediaName =
+                        cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME))
+
+                    val mediaType = mimetype.getMediaType() ?: contentUri.getMediaType(context)
+                    ?: MimeTypeMap.getSingleton().getMimeTypeFromExtension(mediaName).getMediaType()
+
+                    val duration =
+                        if (MediaType.isVideo(mediaType)) {
+                            if (cursor.getColumnIndex(MediaStore.Files.FileColumns.DURATION) > 0) {
+                                cursor.getColumnIndex(MediaStore.Files.FileColumns.DURATION) / 1000
+                            } else {
+                                null
+                            }
                         } else {
                             null
                         }
-                    } else {
-                        0
+
+                    if (mediaType != null) {
+                        media = MediaViewData.Builder()
+                            .uri(contentUri)
+                            .mimeType(mimetype)
+                            .mediaType(mediaType)
+                            .size(size)
+                            .mediaName(mediaName)
+                            .duration(duration)
+                            .pdfPageCount(getPdfPageCount(context, contentUri, mimetype))
+                            .build()
                     }
-
-                val mediaType = mimetype.getMediaType() ?: contentUri.getMediaType(context)
-                ?: MimeTypeMap.getSingleton().getMimeTypeFromExtension(mediaName).getMediaType()
-
-                if (mediaType != null) {
-                    media = MediaViewData.Builder()
-                        .uri(contentUri)
-                        .mimeType(mimetype)
-                        .mediaType(mediaType)
-                        .size(size)
-                        .mediaName(mediaName)
-                        .duration(duration)
-                        .pdfPageCount(getPdfPageCount(context, contentUri, mimetype))
-                        .build()
                 }
             }
+        } catch (e: Exception) {
+            Log.e("CUSTOM_GALLERY", "uri meta failed, ${e.printStackTrace()}")
+            media = null
         }
         return media
     }
@@ -576,6 +581,7 @@ class MediaRepository {
                         .mediaName(mediaName)
                         .duration(duration)
                         .pdfPageCount(getPdfPageCount(context, contentUri, mimetype))
+                        .localFilePath(FileUtil.getRealPath(context, contentUri).path)
                         .build()
                 }
             }

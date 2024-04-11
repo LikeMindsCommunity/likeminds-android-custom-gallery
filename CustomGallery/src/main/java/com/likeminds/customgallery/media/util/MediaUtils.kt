@@ -2,10 +2,7 @@ package com.likeminds.customgallery.media.util
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Typeface
+import android.graphics.*
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.util.Log
@@ -14,9 +11,7 @@ import com.likeminds.customgallery.R
 import com.likeminds.customgallery.media.model.MediaViewData
 import com.likeminds.customgallery.media.model.SingleUriData
 import com.likeminds.customgallery.utils.ViewUtils
-import com.likeminds.customgallery.utils.file.util.FileUtil
-import com.likeminds.customgallery.utils.file.util.MemoryUnitFormat
-import com.likeminds.customgallery.utils.file.util.isLargeFile
+import com.likeminds.customgallery.utils.file.util.*
 import java.io.InputStream
 
 object MediaUtils {
@@ -111,6 +106,7 @@ object MediaUtils {
                             .mediaName(mediaViewData.mediaName)
                             .duration(mediaViewData.duration)
                             .pdfPageCount(mediaViewData.pdfPageCount)
+                            .localFilePath(FileUtil.getRealPath(context, mediaViewData.uri).path)
                             .build()
                     )
                 } else {

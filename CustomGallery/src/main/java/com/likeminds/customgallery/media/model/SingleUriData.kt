@@ -14,7 +14,8 @@ class SingleUriData private constructor(
     val size: Long,
     val mediaName: String?,
     val pdfPageCount: Int?,
-    val duration: Int?
+    val duration: Int?,
+    val localFilePath: String?
 ) : Parcelable {
     class Builder {
         private var uri: Uri = Uri.parse("")
@@ -26,6 +27,7 @@ class SingleUriData private constructor(
         private var mediaName: String? = null
         private var pdfPageCount: Int? = null
         private var duration: Int? = null
+        private var localFilePath: String? = null
 
         fun uri(uri: Uri) = apply { this.uri = uri }
         fun fileType(fileType: String) = apply { this.fileType = fileType }
@@ -36,6 +38,7 @@ class SingleUriData private constructor(
         fun mediaName(mediaName: String?) = apply { this.mediaName = mediaName }
         fun pdfPageCount(pdfPageCount: Int?) = apply { this.pdfPageCount = pdfPageCount }
         fun duration(duration: Int?) = apply { this.duration = duration }
+        fun localFilePath(localFilePath: String?) = apply { this.localFilePath = localFilePath }
 
 
         fun build() = SingleUriData(
@@ -47,7 +50,8 @@ class SingleUriData private constructor(
             size,
             mediaName,
             pdfPageCount,
-            duration
+            duration,
+            localFilePath
         )
     }
 
@@ -61,5 +65,6 @@ class SingleUriData private constructor(
             .mediaName(mediaName)
             .pdfPageCount(pdfPageCount)
             .duration(duration)
+            .localFilePath(localFilePath)
     }
 }

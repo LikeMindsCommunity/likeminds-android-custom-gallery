@@ -17,12 +17,15 @@ object AndroidUtil {
                 IMAGE -> {
                     FileUtil.getSharedImageUri(context, singleUriData.uri)
                 }
+
                 VIDEO -> {
                     FileUtil.getSharedVideoUri(context, singleUriData.uri)
                 }
+
                 PDF -> {
                     FileUtil.getSharedPdfUri(context, singleUriData.uri)
                 }
+
                 else -> null
             }
             if (uri != null) {
@@ -48,12 +51,15 @@ object AndroidUtil {
             MediaType.isBothImageAndVideo(mediaTypes) -> {
                 getExternalMediaPickerIntent(allowMultipleSelect)
             }
+
             MediaType.isImage(mediaTypes) -> {
                 getExternalImagePickerIntent(allowMultipleSelect)
             }
+
             MediaType.isVideo(mediaTypes) -> {
                 getExternalVideoPickerIntent(allowMultipleSelect)
             }
+
             else -> null
         }
         if (intent != null && browseClassName != null) {

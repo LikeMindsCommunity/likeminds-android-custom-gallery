@@ -19,7 +19,6 @@ import com.likeminds.customgallery.utils.customview.BaseAppCompatActivity
 import com.likeminds.customgallery.utils.downloader.DownloadUtil
 import com.likeminds.customgallery.utils.permissions.Permission
 import com.likeminds.customgallery.utils.permissions.PermissionManager
-import com.likeminds.customgallery.utils.permissions.PermissionTask
 
 internal object MediaViewUtils {
     fun getOverflowMenu(
@@ -49,53 +48,79 @@ internal object MediaViewUtils {
         if (activity !is BaseAppCompatActivity) {
             return
         }
-        PermissionManager.performTaskWithPermission(
-            activity,
-            PermissionTask {
-                val downloadObserver = DownloadUtil.startDownload(
-                    activity,
-                    uri.toString(),
-                    notificationIcon
-                )
-                if (downloadObserver == null) {
-                    ViewUtils.showShortToast(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            startDownloadTask(
+                lifecycleOwner,
+                activity,
+                uri,
+                notificationIcon
+            )
+        } else {
+            PermissionManager.performTaskWithPermission(
+                activity,
+                {
+                    startDownloadTask(
+                        lifecycleOwner,
                         activity,
-                        activity.getString(R.string.media_is_downloading)
+                        uri,
+                        notificationIcon
                     )
-                    return@PermissionTask
-                }
-                val type = uri.getMediaType(activity)
-                downloadObserver.observe(lifecycleOwner) { state ->
-                    when (state) {
-                        WorkInfo.State.ENQUEUED -> {
-                            if (type == VIDEO && lifecycleOwner.lifecycle.currentState.isAtLeast(
-                                    Lifecycle.State.RESUMED
-                                )
-                            ) {
-                                ViewUtils.showShortToast(
-                                    activity,
-                                    activity.getString(R.string.downloading_video)
-                                )
-                            }
-                        }
-                        WorkInfo.State.SUCCEEDED -> {
-                            if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-                                val toastMessage = DownloadUtil.getToastMessage(
-                                    activity,
-                                    type
-                                )
-                                ViewUtils.showShortToast(activity, toastMessage)
-                            }
-                        }
-                        else -> {
-                            Log.i("saveToGallery", "Worker State : $state")
-                        }
+                },
+                Permission.getStoragePermissionData(),
+                showInitialPopup = true,
+                showDeniedPopup = true
+            )
+        }
+    }
+
+    private fun startDownloadTask(
+        lifecycleOwner: LifecycleOwner,
+        activity: Activity,
+        uri: Uri,
+        notificationIcon: Int
+    ) {
+        val type = uri.getMediaType(activity)
+
+        val downloadObserver = DownloadUtil.startDownload(
+            activity,
+            uri.toString(),
+            notificationIcon
+        )
+        if (downloadObserver == null) {
+            ViewUtils.showShortToast(
+                activity,
+                activity.getString(R.string.media_is_downloading)
+            )
+            return
+        }
+        downloadObserver.observe(lifecycleOwner) { state ->
+            when (state) {
+                WorkInfo.State.ENQUEUED -> {
+                    if (type == VIDEO && lifecycleOwner.lifecycle.currentState.isAtLeast(
+                            Lifecycle.State.RESUMED
+                        )
+                    ) {
+                        ViewUtils.showShortToast(
+                            activity,
+                            activity.getString(R.string.downloading_video)
+                        )
                     }
                 }
-            },
-            Permission.getStoragePermissionData(),
-            showInitialPopup = true,
-            showDeniedPopup = true
-        )
+
+                WorkInfo.State.SUCCEEDED -> {
+                    if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                        val toastMessage = DownloadUtil.getToastMessage(
+                            activity,
+                            type
+                        )
+                        ViewUtils.showShortToast(activity, toastMessage)
+                    }
+                }
+
+                else -> {
+                    Log.i("saveToGallery", "Worker State : $state")
+                }
+            }
+        }
     }
 }

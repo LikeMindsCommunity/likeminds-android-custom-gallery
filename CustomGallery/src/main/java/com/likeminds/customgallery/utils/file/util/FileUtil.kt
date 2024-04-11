@@ -1,23 +1,17 @@
 package com.likeminds.customgallery.utils.file.util
 
-import android.content.ComponentName
 import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.ExifInterface
-import android.media.MediaMetadataRetriever
-import android.media.ThumbnailUtils
+import android.media.*
 import android.net.Uri
-import android.os.Build
-import android.os.CancellationSignal
-import android.os.Environment
+import android.os.*
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
 import android.util.Size
 import androidx.core.content.FileProvider
-import com.likeminds.customgallery.LMFileProvider
 import com.likeminds.customgallery.utils.file.model.FileData
 import com.likeminds.customgallery.utils.file.util.Constants.FileConstants.CLOUD_FILE
 import com.likeminds.customgallery.utils.file.util.Constants.FileConstants.LOCAL_PROVIDER
@@ -69,7 +63,7 @@ object FileUtil {
         return "${folder.toString()}/${getFileName(context, uri)}"
     }
 
-    fun getFileName(context: Context?, fileUri: Uri): String? {
+    private fun getFileName(context: Context?, fileUri: Uri): String? {
         var fileName: String? = null
         if (fileUri.scheme == ContentResolver.SCHEME_CONTENT) {
             context?.contentResolver?.query(fileUri, null, null, null, null)?.use { cursor ->
@@ -196,13 +190,8 @@ object FileUtil {
     /**
      * returns the package of file provider, required for attachments
      **/
-    fun getFileProviderPackage(context: Context): String {
-        //get component
-        val compName = ComponentName(context, LMFileProvider::class.java)
-        //get provider
-        val providerInfo = context.packageManager.getProviderInfo(compName, 0)
-        //get provider authority
-        return providerInfo.authority
+    private fun getFileProviderPackage(context: Context): String {
+        return "${context.packageName}.fileprovider"
     }
 
     fun getSharedImageUri(context: Context, uri: Uri?): Uri? {
