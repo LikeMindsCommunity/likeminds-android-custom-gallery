@@ -110,7 +110,6 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
         checkStoragePermission()
     }
 
-
     private fun checkStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val mediaTypes = mediaPickerExtras.mediaTypes
@@ -187,6 +186,9 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
                 putParcelable(ARG_MEDIA_PICKER_EXTRAS, mediaPickerExtras)
             }
             navController.setGraph(navGraph, args)
+        } else {
+            setResult(Activity.RESULT_OK, intent)
+            finish()
         }
     }
 
