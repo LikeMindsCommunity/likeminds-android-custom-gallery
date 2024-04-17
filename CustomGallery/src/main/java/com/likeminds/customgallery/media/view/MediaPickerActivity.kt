@@ -47,24 +47,32 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
 
     private val browserMediaLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val uris = MediaUtils.getExternalIntentPickerUris(result.data)
-                val mediaRepository = MediaRepository()
-                mediaRepository.getLocalUrisDetails(this, uris) {
-                    val mediaUris = MediaUtils.convertMediaViewDataToSingleUriData(
-                        this, it
-                    )
-                    if (mediaUris.isNotEmpty() && mediaPickerExtras.isEditingAllowed) {
-                        showPickDocumentsListScreen(mediaUris)
-                    } else {
-                        setResultAndFinish(
-                            mediaUris,
-                            mediaPickerExtras.text
+            when (result.resultCode) {
+                Activity.RESULT_OK -> {
+                    val uris = MediaUtils.getExternalIntentPickerUris(result.data)
+                    val mediaRepository = MediaRepository()
+                    mediaRepository.getLocalUrisDetails(this, uris) {
+                        val mediaUris = MediaUtils.convertMediaViewDataToSingleUriData(
+                            this, it
                         )
+                        if (mediaUris.isNotEmpty() && mediaPickerExtras.isEditingAllowed) {
+                            showPickDocumentsListScreen(mediaUris)
+                        } else {
+                            setResultAndFinish(
+                                mediaUris,
+                                mediaPickerExtras.text
+                            )
+                        }
                     }
                 }
-            } else if (result?.resultCode == Activity.RESULT_FIRST_USER) {
-                finish()
+
+                Activity.RESULT_CANCELED -> {
+                    finish()
+                }
+
+                Activity.RESULT_FIRST_USER -> {
+                    finish()
+                }
             }
         }
 
@@ -187,8 +195,8 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
             }
             navController.setGraph(navGraph, args)
         } else {
-            setResult(Activity.RESULT_OK, intent)
-            finish()
+//            setResult(Activity.RESULT_OK, intent)
+//            finish()
         }
     }
 

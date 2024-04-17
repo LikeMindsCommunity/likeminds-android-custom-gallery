@@ -95,10 +95,13 @@ object AndroidUtil {
      * */
     private fun getExternalMediaPickerIntent(allowMultipleSelect: Boolean = true): Intent {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = "*/*"
         intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*"))
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, allowMultipleSelect)
         intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true)
+        intent.setFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         return intent
     }
 
@@ -106,10 +109,13 @@ object AndroidUtil {
      * Returns the Intent to pick pdfs from external storage
      * */
     fun getExternalDocumentPickerIntent(allowMultipleSelect: Boolean = true): Intent {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = "application/pdf"
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, allowMultipleSelect)
         intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true)
+        intent.setFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         return intent
     }
 

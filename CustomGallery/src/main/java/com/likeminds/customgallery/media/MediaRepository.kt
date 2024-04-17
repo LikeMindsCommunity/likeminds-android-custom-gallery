@@ -1,8 +1,7 @@
 package com.likeminds.customgallery.media
 
 import android.annotation.SuppressLint
-import android.content.ContentUris
-import android.content.Context
+import android.content.*
 import android.graphics.BitmapFactory
 import android.graphics.pdf.PdfRenderer
 import android.media.MediaMetadataRetriever
@@ -15,21 +14,20 @@ import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.annotation.WorkerThread
 import com.annimon.stream.Stream
+import com.likeminds.customgallery.CustomGallery
 import com.likeminds.customgallery.R
 import com.likeminds.customgallery.media.model.*
 import com.likeminds.customgallery.media.util.MediaUtils
-import com.likeminds.customgallery.utils.*
+import com.likeminds.customgallery.utils.DateUtil
 import com.likeminds.customgallery.utils.ValueUtils.getMediaType
 import com.likeminds.customgallery.utils.ValueUtils.getMimeType
 import com.likeminds.customgallery.utils.ValueUtils.getOrDefault
-import com.likeminds.customgallery.utils.file.util.FileUtil
-import com.likeminds.customgallery.utils.file.util.isLargeFile
-import com.likeminds.customgallery.utils.file.util.isSmallFile
+import com.likeminds.customgallery.utils.file.util.*
 import com.likeminds.customgallery.utils.model.ITEM_MEDIA_PICKER_AUDIO
 import com.likeminds.customgallery.utils.model.ITEM_MEDIA_PICKER_DOCUMENT
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
-import java.util.*
+import java.util.LinkedList
 
 /**
  * Handles the retrieval of media present on the user's device.
@@ -546,10 +544,15 @@ class MediaRepository {
                             .thumbnailUri(thumbnailUri)
                             .build()
                     }
+                    context.grantUriPermission(
+                        CustomGallery.applicationPackage,
+                        contentUri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
                 }
             }
         } catch (e: Exception) {
-            Log.e("CUSTOM_GALLERY", "uri meta failed, ${e.printStackTrace()}")
+            Log.e("CUSTOM_GALLERY", "uri meta failed, ${e.localizedMessage}")
             media = null
         }
         return media

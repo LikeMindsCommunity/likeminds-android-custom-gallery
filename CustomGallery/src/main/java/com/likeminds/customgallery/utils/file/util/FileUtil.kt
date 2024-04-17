@@ -191,7 +191,7 @@ object FileUtil {
      * returns the package of file provider, required for attachments
      **/
     private fun getFileProviderPackage(context: Context): String {
-        return "${context.packageName}.fileprovider"
+        return "12345678901234567890.provider"
     }
 
     fun getSharedImageUri(context: Context, uri: Uri?): Uri? {

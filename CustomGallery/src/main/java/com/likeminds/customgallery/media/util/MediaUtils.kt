@@ -135,6 +135,7 @@ object MediaUtils {
                 }
             } else {
                 val mediaUri = data.data
+                Log.d("PUI", "getExternalIntentPickerUris: ${mediaUri?.path}")
                 if (mediaUri != null) uris.add(mediaUri)
             }
         }
