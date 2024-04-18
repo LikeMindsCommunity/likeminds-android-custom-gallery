@@ -2,9 +2,7 @@ package com.likeminds.customgallery.media.view
 
 import android.app.Activity
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
+import android.view.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.findNavController
@@ -21,12 +19,8 @@ import com.likeminds.customgallery.media.viewmodel.MediaViewModel
 import com.likeminds.customgallery.utils.AndroidUtil
 import com.likeminds.customgallery.utils.actionmode.ActionModeCallback
 import com.likeminds.customgallery.utils.actionmode.ActionModeListener
-import com.likeminds.customgallery.utils.customview.BaseAppCompatActivity
 import com.likeminds.customgallery.utils.customview.BaseFragment
 import com.likeminds.customgallery.utils.model.ITEM_MEDIA_PICKER_HEADER
-import com.likeminds.customgallery.utils.permissions.Permission
-import com.likeminds.customgallery.utils.permissions.PermissionDeniedCallback
-import com.likeminds.customgallery.utils.permissions.PermissionManager
 
 
 internal class MediaPickerItemFragment :
@@ -76,7 +70,6 @@ internal class MediaPickerItemFragment :
         }
         initializeUI()
         initializeListeners()
-        checkStoragePermission()
 
         viewModel.fetchMediaInBucket(
             requireContext(),
@@ -85,25 +78,6 @@ internal class MediaPickerItemFragment :
         ).observe(viewLifecycleOwner) {
             mediaPickerAdapter.replace(it)
         }
-    }
-
-    private fun checkStoragePermission() {
-        PermissionManager.performTaskWithPermission(
-            activity as BaseAppCompatActivity,
-            { },
-            Permission.getStoragePermissionData(),
-            showInitialPopup = true,
-            showDeniedPopup = true,
-            permissionDeniedCallback = object : PermissionDeniedCallback {
-                override fun onDeny() {
-                    requireActivity().supportFragmentManager.popBackStack()
-                }
-
-                override fun onCancel() {
-                    requireActivity().supportFragmentManager.popBackStack()
-                }
-            }
-        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -117,6 +91,7 @@ internal class MediaPickerItemFragment :
                 startActionMode()
                 true
             }
+
             else -> false
         }
     }
