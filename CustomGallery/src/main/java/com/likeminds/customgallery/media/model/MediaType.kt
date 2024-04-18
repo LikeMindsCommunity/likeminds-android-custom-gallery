@@ -7,9 +7,10 @@ const val IMAGE = "image"
 const val VIDEO = "video"
 const val AUDIO = "audio"
 const val PDF = "pdf"
+const val GIF = "gif"
 
 @StringDef(
-    IMAGE, VIDEO, PDF, AUDIO
+    IMAGE, VIDEO, PDF, AUDIO, GIF
 )
 
 @Retention(AnnotationRetention.SOURCE)
@@ -43,7 +44,8 @@ annotation class MediaType {
             return type == IMAGE ||
                     type == VIDEO ||
                     type == AUDIO ||
-                    type == PDF
+                    type == PDF ||
+                    type == GIF
         }
 
         fun isImage(mediaType: String?): Boolean {
@@ -92,6 +94,7 @@ annotation class MediaType {
                 VIDEO -> "VID_"
                 PDF -> "DOC_"
                 AUDIO -> "AUD_"
+                GIF -> "GIF_"
                 else -> "MEDIA_"
             }
             if (isThumbnail) {
@@ -108,12 +111,13 @@ annotation class MediaType {
             var extension = file.extension
             if (extension.isEmpty()) {
                 extension = if (isThumbnail) {
-                    "jpg"
+                    if (mediaType == GIF) "png" else "jpg"
                 } else {
                     when (mediaType) {
                         IMAGE -> "jpg"
                         VIDEO -> "mp4"
                         PDF -> "pdf"
+                        GIF -> "gif"
                         else -> ""
                     }
                 }

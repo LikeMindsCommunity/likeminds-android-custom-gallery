@@ -2,10 +2,7 @@ package com.likeminds.customgallery.media.util
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Typeface
+import android.graphics.*
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.util.Log
@@ -14,12 +11,10 @@ import com.likeminds.customgallery.R
 import com.likeminds.customgallery.media.model.MediaViewData
 import com.likeminds.customgallery.media.model.SingleUriData
 import com.likeminds.customgallery.utils.ViewUtils
-import com.likeminds.customgallery.utils.file.util.FileUtil
-import com.likeminds.customgallery.utils.file.util.MemoryUnitFormat
-import com.likeminds.customgallery.utils.file.util.isLargeFile
+import com.likeminds.customgallery.utils.file.util.*
 import java.io.InputStream
 
-internal object MediaUtils {
+object MediaUtils {
 
     private const val TAG = "MediaUtils"
 
@@ -111,6 +106,8 @@ internal object MediaUtils {
                             .mediaName(mediaViewData.mediaName)
                             .duration(mediaViewData.duration)
                             .pdfPageCount(mediaViewData.pdfPageCount)
+                            .localFilePath(FileUtil.getRealPath(context, mediaViewData.uri).path)
+                            .thumbnailUri(mediaViewData.thumbnailUri)
                             .build()
                     )
                 } else {
@@ -138,6 +135,7 @@ internal object MediaUtils {
                 }
             } else {
                 val mediaUri = data.data
+                Log.d("PUI", "getExternalIntentPickerUris: ${mediaUri?.path}")
                 if (mediaUri != null) uris.add(mediaUri)
             }
         }

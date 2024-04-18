@@ -3,12 +3,14 @@ package com.likeminds.customgallery
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import com.likeminds.customgallery.media.model.*
 import com.likeminds.customgallery.media.view.MediaPickerActivity
 
 object CustomGallery {
     const val ARG_CUSTOM_GALLERY_RESULT = "custom_gallery_result"
+    lateinit var applicationPackage: String
 
     /**
      * initiates the media picker and starts
@@ -21,7 +23,12 @@ object CustomGallery {
         context: Context,
         customGalleryConfig: CustomGalleryConfig
     ) {
-        initiateMediaPicker(launcher, context, customGalleryConfig)
+        applicationPackage = context.applicationContext.packageName
+        initiateMediaPicker(
+            launcher,
+            context,
+            customGalleryConfig
+        )
     }
 
     // initiates the media picker as per the passed configurations
@@ -42,10 +49,12 @@ object CustomGallery {
                 val intent = MediaPickerActivity.getIntent(context, extras)
                 launcher.launch(intent)
             }
+
             AUDIO -> {
                 val intent = MediaPickerActivity.getIntent(context, extras)
                 launcher.launch(intent)
             }
+
             else -> {
                 val intent = MediaPickerActivity.getIntent(context, extras)
                 launcher.launch(intent)
@@ -60,6 +69,7 @@ object CustomGallery {
         text: String?
     ): Intent {
         val customGalleryResult = CustomGalleryResult.Builder()
+            .mediaTypes(mediaTypes)
             .medias(mediaUris)
             .text(text)
             .build()

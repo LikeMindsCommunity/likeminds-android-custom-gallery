@@ -12,13 +12,13 @@ class SessionPermission constructor(applicationContext: Context) {
         applicationContext.getSharedPreferences(PERMISSION_PREFS, Context.MODE_PRIVATE)
     }
 
-    fun setPermissionRequest(permission: Permission) {
+    fun setPermissionRequest(permissionName: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-            permissionPreferences.edit().putBoolean(permission.permissionName, true).apply()
+            permissionPreferences.edit().putBoolean(permissionName, true).apply()
         }
     }
 
-    fun wasPermissionRequestedBefore(permission: Permission): Boolean {
-        return permissionPreferences.getBoolean(permission.permissionName, false)
+    fun wasPermissionRequestedBefore(permissionName: String): Boolean {
+        return permissionPreferences.getBoolean(permissionName, false)
     }
 }

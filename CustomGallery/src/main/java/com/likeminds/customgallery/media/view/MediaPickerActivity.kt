@@ -16,9 +16,7 @@ import com.likeminds.customgallery.media.view.MediaActivity.Companion.BUNDLE_MED
 import com.likeminds.customgallery.utils.AndroidUtil
 import com.likeminds.customgallery.utils.ViewUtils.currentFragment
 import com.likeminds.customgallery.utils.customview.BaseAppCompatActivity
-import com.likeminds.customgallery.utils.permissions.Permission
-import com.likeminds.customgallery.utils.permissions.PermissionDeniedCallback
-import com.likeminds.customgallery.utils.permissions.PermissionManager
+import com.likeminds.customgallery.utils.permissions.*
 
 internal class MediaPickerActivity : BaseAppCompatActivity() {
 
@@ -49,24 +47,32 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
 
     private val browserMediaLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val uris = MediaUtils.getExternalIntentPickerUris(result.data)
-                val mediaRepository = MediaRepository()
-                mediaRepository.getLocalUrisDetails(this, uris) {
-                    val mediaUris = MediaUtils.convertMediaViewDataToSingleUriData(
-                        this, it
-                    )
-                    if (mediaUris.isNotEmpty() && mediaPickerExtras.isEditingAllowed) {
-                        showPickDocumentsListScreen(mediaUris)
-                    } else {
-                        setResultAndFinish(
-                            mediaUris,
-                            mediaPickerExtras.text
+            when (result.resultCode) {
+                Activity.RESULT_OK -> {
+                    val uris = MediaUtils.getExternalIntentPickerUris(result.data)
+                    val mediaRepository = MediaRepository()
+                    mediaRepository.getLocalUrisDetails(this, uris) {
+                        val mediaUris = MediaUtils.convertMediaViewDataToSingleUriData(
+                            this, it
                         )
+                        if (mediaUris.isNotEmpty() && mediaPickerExtras.isEditingAllowed) {
+                            showPickDocumentsListScreen(mediaUris)
+                        } else {
+                            setResultAndFinish(
+                                mediaUris,
+                                mediaPickerExtras.text
+                            )
+                        }
                     }
                 }
-            } else if (result?.resultCode == Activity.RESULT_FIRST_USER) {
-                finish()
+
+                Activity.RESULT_CANCELED -> {
+                    finish()
+                }
+
+                Activity.RESULT_FIRST_USER -> {
+                    finish()
+                }
             }
         }
 
@@ -76,6 +82,7 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
                 val data =
                     result.data?.extras?.getParcelable<MediaExtras>(BUNDLE_MEDIA_EXTRAS)
                         ?: return@registerForActivityResult
+
                 setResultAndFinish(
                     data.mediaUris?.toList() ?: listOf(),
                     data.text
@@ -111,24 +118,49 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
         checkStoragePermission()
     }
 
-
     private fun checkStoragePermission() {
-        PermissionManager.performTaskWithPermission(
-            this,
-            { startMediaPickerFragment() },
-            Permission.getStoragePermissionData(),
-            showInitialPopup = true,
-            showDeniedPopup = true,
-            permissionDeniedCallback = object : PermissionDeniedCallback {
-                override fun onDeny() {
-                    onBackPressed()
-                }
-
-                override fun onCancel() {
-                    onBackPressed()
-                }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val mediaTypes = mediaPickerExtras.mediaTypes
+            if (mediaTypes.contains(PDF) || mediaTypes.contains(GIF)) {
+                startMediaPickerFragment()
+                return
             }
-        )
+            val permissionExtras = Permission.getGalleryPermissionExtras(this)
+
+            PermissionManager.performTaskWithPermissionExtras(
+                this,
+                { startMediaPickerFragment() },
+                permissionExtras,
+                showInitialPopup = true,
+                showDeniedPopup = true,
+                permissionDeniedCallback = object : PermissionDeniedCallback {
+                    override fun onDeny() {
+                        onBackPressedDispatcher.onBackPressed()
+                    }
+
+                    override fun onCancel() {
+                        onBackPressedDispatcher.onBackPressed()
+                    }
+                }
+            )
+        } else {
+            PermissionManager.performTaskWithPermission(
+                this,
+                { startMediaPickerFragment() },
+                Permission.getStoragePermissionData(),
+                showInitialPopup = true,
+                showDeniedPopup = true,
+                permissionDeniedCallback = object : PermissionDeniedCallback {
+                    override fun onDeny() {
+                        onBackPressedDispatcher.onBackPressed()
+                    }
+
+                    override fun onCancel() {
+                        onBackPressedDispatcher.onBackPressed()
+                    }
+                }
+            )
+        }
     }
 
     private fun startMediaPickerFragment() {
@@ -145,12 +177,15 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
                 MediaType.isImageOrVideo(mediaPickerExtras.mediaTypes) -> {
                     navGraph.setStartDestination(R.id.mediaPickerFolderFragment)
                 }
+
                 MediaType.isPDF(mediaPickerExtras.mediaTypes) -> {
                     navGraph.setStartDestination(R.id.mediaPickerDocumentFragment)
                 }
+
                 MediaType.isAudio(mediaPickerExtras.mediaTypes) -> {
                     navGraph.setStartDestination(R.id.mediaPickerAudioFragment)
                 }
+
                 else -> {
                     finish()
                 }
@@ -159,6 +194,9 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
                 putParcelable(ARG_MEDIA_PICKER_EXTRAS, mediaPickerExtras)
             }
             navController.setGraph(navGraph, args)
+        } else {
+//            setResult(Activity.RESULT_OK, intent)
+//            finish()
         }
     }
 
@@ -174,7 +212,6 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
                 allowMultipleSelect = mediaPickerExtras.allowMultipleSelect
             )
             browserMediaLauncher.launch(intent)
-            finish()
             return true
         }
         return false
@@ -219,15 +256,19 @@ internal class MediaPickerActivity : BaseAppCompatActivity() {
             is MediaPickerFolderFragment -> {
                 super.onBackPressed()
             }
+
             is MediaPickerItemFragment -> {
                 fragment.onBackPressedFromFragment()
             }
+
             is MediaPickerDocumentFragment -> {
                 if (fragment.onBackPressedFromFragment()) super.onBackPressed()
             }
+
             is MediaPickerAudioFragment -> {
                 if (fragment.onBackPress()) super.onBackPressed()
             }
+
             else -> {
                 super.onBackPressed()
             }
