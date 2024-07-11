@@ -5,10 +5,10 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.SparseArray
-import androidx.annotation.NonNull
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.likeminds.customgallery.utils.permissions.*
+import com.likeminds.customgallery.utils.permissions.Permission.Companion.READ_MEDIA_VISUAL_USER_SELECTED
 
 open class BaseAppCompatActivity : AppCompatActivity() {
     /**
@@ -38,11 +38,18 @@ open class BaseAppCompatActivity : AppCompatActivity() {
             true
         } else {
             var hasPermission = true
+            var isPartialMediaPermission = false
             permissions.forEach { permission ->
+                if (permission == READ_MEDIA_VISUAL_USER_SELECTED
+                    && checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    isPartialMediaPermission = true
+                    return@forEach
+                }
                 hasPermission =
                     hasPermission && checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
             }
-            return hasPermission
+            return hasPermission || isPartialMediaPermission
         }
     }
 
@@ -89,8 +96,8 @@ open class BaseAppCompatActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
-        @NonNull permissions: Array<String>,
-        @NonNull grantResults: IntArray,
+        permissions: Array<String>,
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         val callback = permissionCallbackSparseArray.get(requestCode, null) ?: return
