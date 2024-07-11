@@ -37,7 +37,7 @@ class Permission private constructor(
 
         private const val REQUEST_STORAGE = 10102
         private const val REQUEST_RECORD_AUDIO = 10103
-        private const val REQUEST_GALLERY = 10106
+        const val REQUEST_GALLERY = 10106
         private const val REQUEST_AUDIO = 10107
 
         fun getStoragePermissionData(): Permission {
