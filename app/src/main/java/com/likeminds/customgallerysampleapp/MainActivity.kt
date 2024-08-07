@@ -2,6 +2,7 @@ package com.likeminds.customgallerysampleapp
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.likeminds.customgallery.CustomGallery
@@ -18,6 +19,8 @@ class MainActivity : AppCompatActivity() {
                 val data = result.data?.extras?.getParcelable<CustomGalleryResult>(
                     CustomGallery.ARG_CUSTOM_GALLERY_RESULT
                 ) ?: return@registerForActivityResult
+
+                Log.d("PUI", ": ${data.medias.size} ${data.medias[0].uri}")
             }
         }
 

@@ -1,7 +1,6 @@
 package com.likeminds.customgallery.utils.permissions
 
 import android.os.Build
-import androidx.annotation.NonNull
 import com.likeminds.customgallery.utils.customview.BaseAppCompatActivity
 
 class PermissionManager {
@@ -87,8 +86,8 @@ class PermissionManager {
         }
 
         fun performTaskWithPermission(
-            @NonNull activity: BaseAppCompatActivity,
-            @NonNull task: PermissionTask,
+            activity: BaseAppCompatActivity,
+            task: PermissionTask,
             permission: Permission,
             showInitialPopup: Boolean,
             showDeniedPopup: Boolean,
