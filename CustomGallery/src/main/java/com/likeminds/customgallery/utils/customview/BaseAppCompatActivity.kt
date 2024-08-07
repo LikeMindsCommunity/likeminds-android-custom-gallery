@@ -5,10 +5,11 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.SparseArray
-import androidx.annotation.NonNull
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.likeminds.customgallery.utils.permissions.*
+import com.likeminds.customgallery.utils.permissions.Permission.Companion.READ_MEDIA_VISUAL_USER_SELECTED
+import com.likeminds.customgallery.utils.permissions.Permission.Companion.REQUEST_GALLERY
 
 open class BaseAppCompatActivity : AppCompatActivity() {
     /**
@@ -38,11 +39,18 @@ open class BaseAppCompatActivity : AppCompatActivity() {
             true
         } else {
             var hasPermission = true
+            var isPartialMediaPermission = false
             permissions.forEach { permission ->
+                if (permission == READ_MEDIA_VISUAL_USER_SELECTED
+                    && checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    isPartialMediaPermission = true
+                    return@forEach
+                }
                 hasPermission =
                     hasPermission && checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
             }
-            return hasPermission
+            return hasPermission || isPartialMediaPermission
         }
     }
 
@@ -89,13 +97,19 @@ open class BaseAppCompatActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
-        @NonNull permissions: Array<String>,
-        @NonNull grantResults: IntArray,
+        permissions: Array<String>,
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         val callback = permissionCallbackSparseArray.get(requestCode, null) ?: return
         if (grantResults.isNotEmpty()) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                callback.onGrant()
+            } else if (requestCode == REQUEST_GALLERY
+                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && checkSelfPermission(READ_MEDIA_VISUAL_USER_SELECTED) == PackageManager.PERMISSION_GRANTED
+            ) {
+                //if the API version >= 34 and the request code is REQUEST_GALLERY then we check if the READ_MEDIA_VISUAL_USER_SELECTED permission is granted
                 callback.onGrant()
             } else {
                 callback.onDeny()

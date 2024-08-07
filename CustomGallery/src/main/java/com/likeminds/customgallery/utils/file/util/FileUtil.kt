@@ -249,6 +249,24 @@ object FileUtil {
         }
     }
 
+    fun getVideoDimensions(context: Context, videoUri: Uri?): Pair<Int, Int> {
+        val mediaMetadataRetriever: MediaMetadataRetriever
+        return try {
+            mediaMetadataRetriever = MediaMetadataRetriever()
+            mediaMetadataRetriever.setDataSource(context, videoUri)
+            val width =
+                mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+                    ?.toInt() ?: -1
+            val height =
+                mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+                    ?.toInt() ?: -1
+            Pair(width, height)
+        } catch (e: Exception) {
+            Log.e("SDK", "error: ${e.localizedMessage}")
+            Pair(-1, -1)
+        }
+    }
+
     fun getVideoThumbnailUri(context: Context, videoUri: Uri?): Uri? {
         var bitmap: Bitmap? = null
         var mediaMetadataRetriever: MediaMetadataRetriever? = null
