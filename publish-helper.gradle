@@ -17,8 +17,8 @@ afterEvaluate {
                     url = 'https://github.com/LikeMindsCommunity/LikeMinds-Android-Custom-Gallery'
                     licenses {
                         license {
-                            name = 'LikeMinds License'
-                            url = 'https://likeminds.community/privacy-policy/'
+                            name = 'The Apache License, Version 2.0'
+                            url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
                         }
                     }
                     scm {
@@ -59,8 +59,8 @@ afterEvaluate {
                     url = 'https://github.com/LikeMindsCommunity/LikeMinds-Android-Custom-Gallery'
                     licenses {
                         license {
-                            name = 'LikeMinds License'
-                            url = 'https://likeminds.community/privacy-policy/'
+                            name = 'The Apache License, Version 2.0'
+                            url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
                         }
                     }
                     scm {
