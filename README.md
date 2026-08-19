@@ -29,7 +29,7 @@ can be used on its own.
 
 ## Contributing
 
-See the org-wide [contributing guide](https://github.com/LikeMindsCommunity/.github/blob/master/.github/CONTRIBUTING.md).
+See the org-wide [contributing guide](https://github.com/LikeMindsCommunity/.github/blob/main/.github/CONTRIBUTING.md).
 
 ## License
 
